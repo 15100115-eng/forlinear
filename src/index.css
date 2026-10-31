@@ -177,6 +177,7 @@ tr.total td { font-weight: 600; border-top: 2px solid var(--axis); }
 .small { font-size: 13px; }
 .cell-sub { color: var(--muted); font-size: 12px; margin-top: 2px; max-width: 420px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .badge { display: inline-block; padding: 1px 7px; border-radius: 999px; font-size: 11px; font-weight: 600; border: 1px solid var(--border); color: var(--text-2); margin-left: 6px; vertical-align: middle; }
+.badge.sale { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
 .badge.loss { color: var(--critical-text); border-color: color-mix(in srgb, var(--critical) 40%, transparent); }
 .row-actions { display: flex; gap: 4px; justify-content: flex-end; }
 .icon-btn { border: 0; background: transparent; cursor: pointer; padding: 4px 6px; border-radius: 6px; color: var(--muted); }
@@ -325,3 +326,23 @@ tr.total td { font-weight: 600; border-top: 2px solid var(--axis); }
 .oc-meta { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; color: var(--muted); font-size: 12.5px; margin-top: 8px; }
 .oc-actions { margin-left: auto; display: flex; gap: 2px; }
 .total-card { display: flex; justify-content: space-between; font-weight: 600; background: var(--surface-2); }
+
+.type-pick { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.type-btn { border: 2px solid var(--border); background: var(--surface); border-radius: 12px; padding: 14px 16px; text-align: left; cursor: pointer; display: flex; gap: 12px; align-items: center; }
+.type-btn .ico { font-size: 26px; }
+.type-btn b { display: block; font-size: 15px; }
+.type-btn small { color: var(--muted); }
+.type-btn.active { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--surface)); }
+.hint { font-size: 12.5px; color: var(--muted); margin: -2px 0 0 24px; }
+.line.sale { grid-template-columns: 1fr 90px 120px 130px 100px 32px; align-items: end; }
+.line.sale .amount, .line.sale .icon-btn { margin-bottom: 8px; }
+.line.sale .field { font-size: 12px; }
+@media (max-width: 900px) {
+  .line.sale { grid-template-columns: 1fr 1fr; grid-template-areas: 'name name' 'qty price' 'cost amount' 'del del'; }
+  .line.sale > *:nth-child(1) { grid-area: name; }
+  .line.sale > *:nth-child(2) { grid-area: qty; }
+  .line.sale > *:nth-child(3) { grid-area: price; }
+  .line.sale > *:nth-child(4) { grid-area: cost; }
+  .line.sale > *:nth-child(5) { grid-area: amount; align-self: center; text-align: left; font-weight: 600; }
+  .line.sale > *:nth-child(6) { grid-area: del; justify-self: end; }
+}

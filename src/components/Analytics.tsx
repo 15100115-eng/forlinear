@@ -41,7 +41,7 @@ export function Analytics({ data, t, lang, month }: { data: AppData; t: (k: TKey
   }, [scoped])
 
   const trend = reports.map((r) => ({ m: fmtMonth(r.month, lang), labor: r.labor, tax: r.tax, materials: r.materials, other: r.other, ads: r.ads }))
-  const streams = reports.map((r) => ({ m: fmtMonth(r.month, lang), profit: r.profit, storage: r.storage, boxSales: r.boxSales }))
+  const streams = reports.map((r) => ({ m: fmtMonth(r.month, lang), moving: r.movingProfit, sales: r.saleProfit, storage: r.storage }))
 
   return (
     <>
@@ -121,9 +121,9 @@ export function Analytics({ data, t, lang, month }: { data: AppData; t: (k: TKey
             data={streams}
             xKey="m"
             series={[
-              { key: 'profit', label: t('series_profit'), color: c.s1 },
+              { key: 'moving', label: t('series_movingProfit'), color: c.s1 },
+              { key: 'sales', label: t('series_saleProfit'), color: c.s3 },
               { key: 'storage', label: t('series_storage'), color: c.s2 },
-              { key: 'boxSales', label: t('series_boxSales'), color: c.s3 },
             ]}
           />
         </Card>

@@ -11,7 +11,7 @@ export function loadData(): AppData {
       const parsed = JSON.parse(raw) as AppData
       if (parsed && parsed.version === 1 && Array.isArray(parsed.orders)) {
         const seed = seedData()
-        return mergeMetaSpend({ ...seed, ...parsed, settings: { ...seed.settings, ...parsed.settings } })
+        return migrateSales(mergeMetaSpend({ ...seed, ...parsed, settings: { ...seed.settings, ...parsed.settings } }))
       }
     }
   } catch {
@@ -28,6 +28,28 @@ export function mergeMetaSpend(d: AppData, items: ReturnType<typeof metaSpendIte
   const isOldPaymentSeed = (x: AppData['opex'][number]) => x.category === 'ads' && x.description === 'Meta Ads' && /^\d{10,}-\d{10,}$/.test(x.ref ?? '')
   const kept = (d.opex ?? []).filter((x) => !x.ref?.startsWith('meta-spend-') && !isOldPaymentSeed(x))
   return { ...d, opex: [...kept, ...items] }
+}
+
+/** Older data kept box sales in a separate list; they are now 'sale' orders. */
+export function migrateSales(d: AppData): AppData {
+  if (!d.sales?.length) return { ...d, sales: [] }
+  const orders = [
+    ...d.orders,
+    ...d.sales.map((s) => ({
+      id: 'sale-' + s.id,
+      type: 'sale' as const,
+      date: s.date,
+      client: 'გაყიდვა',
+      description: '',
+      revenue: s.qty * s.price,
+      vatIncluded: false,
+      applyPayoutTax: false,
+      expenses: [],
+      items: [{ id: 'si-' + s.id, name: s.item.replace(/ყუთები$/, 'ყუთი'), qty: s.qty, price: s.price, unitCost: /ყუთ/.test(s.item) ? 5.5 : 0 }],
+      createdAt: new Date(s.date + 'T12:00:00Z').toISOString(),
+    })),
+  ]
+  return { ...d, orders, sales: [] }
 }
 
 export function saveData(d: AppData) {

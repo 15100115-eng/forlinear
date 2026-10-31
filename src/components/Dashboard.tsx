@@ -39,12 +39,11 @@ export function Dashboard({
   const other = sum((x) => x.otherCosts)
 
   const storageMonthly = data.storage.filter((s) => s.active).reduce((a, s) => a + s.monthlyFee, 0)
-  const boxSales = data.sales.filter((s) => month === 'all' || monthKey(s.date) === month).reduce((a, s) => a + s.qty * s.price, 0)
   const monthsCount = month === 'all' ? Math.max(1, reports.length) : 1
   const opexScoped = data.opex.filter((x) => month === 'all' || monthKey(x.date) === month)
   const ads = opexScoped.filter((x) => x.category === 'ads').reduce((a, x) => a + opexGel(x, data.settings), 0)
   const opexOther = opexScoped.filter((x) => x.category !== 'ads').reduce((a, x) => a + opexGel(x, data.settings), 0)
-  const otherIncome = storageMonthly * monthsCount + boxSales
+  const otherIncome = storageMonthly * monthsCount
   const netResult = profit + otherIncome - ads - opexOther
 
   const cur = month === 'all' ? null : reports.find((r) => r.month === month)
@@ -75,7 +74,7 @@ export function Dashboard({
         <StatTile label={t('kpi_avgProfit')} value={fmtMoney(scoped.length ? profit / scoped.length : 0)} sub={`${t('kpi_margin')}: ${fmtPct(netRevenue ? profit / netRevenue : 0)}`} />
         <StatTile label={t('kpi_remaining')} value={fmtMoney(profit - profitShare)} sub={`${t('kpi_profitShare')} ${data.settings.profitSharePct}%: ${fmtMoney(profitShare)}`} />
         <StatTile label={t('kpi_ads')} value={fmtMoney(ads)} delta={cur && prev ? cur.ads - prev.ads : null} deltaLabel={t('vsPrev')} upIsGood={false} sub={scoped.length ? `${t('adsPerOrder')}: ${fmtMoney(ads / scoped.length)}` : undefined} />
-        <StatTile label={t('kpi_otherIncome')} value={fmtMoney(otherIncome)} sub={`${t('series_storage')} ${fmtMoney(storageMonthly)}/${t('month').toLowerCase()} · ${t('series_boxSales')} ${fmtMoney(boxSales)}`} />
+        <StatTile label={t('kpi_storage')} value={fmtMoney(otherIncome)} sub={`${fmtMoney(storageMonthly)}/${t('month').toLowerCase()} × ${monthsCount}`} />
       </div>
 
       <div className="grid three section">

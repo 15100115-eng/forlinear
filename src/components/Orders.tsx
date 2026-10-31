@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import type { AppData, Order } from '../types'
-import { fmtDate, fmtMonth, fmtPct, monthKey, orderTotals } from '../calc'
+import { fmtDate, fmtMonth, fmtPct, monthKey, orderTotals, orderType } from '../calc'
 import type { Lang, TKey } from '../i18n'
 import { Card, Money } from './ui'
 
@@ -46,11 +46,12 @@ export function OrdersTable({
           <div className="oc-top">
             <div className="oc-client">
               <span className="muted">#{seq.get(o.id)}</span> {o.client}
+              {orderType(o) === 'sale' && <span className="badge sale">{t('type_sale')}</span>}
               {tt.profit < 0 && <span className="badge loss">{t('loss_badge')}</span>}
             </div>
             <div className={`oc-profit ${tt.profit < 0 ? 'neg' : 'pos'}`}>{tt.profit < 0 ? '−' : '+'}{Math.abs(tt.profit).toLocaleString(undefined, { maximumFractionDigits: 0 })} ₾</div>
           </div>
-          {o.description && <div className="oc-desc">{o.description}</div>}
+          {(o.description || (o.items?.length ?? 0) > 0) && <div className="oc-desc">{o.description || o.items!.map((i) => `${i.name} × ${i.qty}`).join(', ')}</div>}
           <div className="oc-meta">
             <span>{fmtDate(o.date)}</span>
             <span>{t('col_revenue')} {tt.grossRevenue.toLocaleString()}</span>
@@ -96,10 +97,11 @@ export function OrdersTable({
               </td>
               <td>
                 {o.client}
+                {orderType(o) === 'sale' && <span className="badge sale">{t('type_sale')}</span>}
                 {tt.profit < 0 && <span className="badge loss">{t('loss_badge')}</span>}
                 {o.vatIncluded && <span className="badge">{t('vat_badge')}</span>}
                 {o.applyPayoutTax && <span className="badge">{t('tax_badge')}</span>}
-                {o.description && <div className="cell-sub" title={o.description}>{o.description}</div>}
+                {(o.description || (o.items?.length ?? 0) > 0) && <div className="cell-sub">{o.description || o.items!.map((i) => `${i.name} × ${i.qty}`).join(', ')}</div>}
               </td>
               <td className="num">{tt.grossRevenue.toLocaleString()}</td>
               {!compact && <td className="num muted">{tt.netRevenue.toLocaleString(undefined, { maximumFractionDigits: 0 })}</td>}
@@ -152,18 +154,25 @@ export function OrdersPage({
 }) {
   const [q, setQ] = useState('')
   const [onlyLoss, setOnlyLoss] = useState(false)
+  const [type, setType] = useState<'all' | 'moving' | 'sale'>('all')
   const orders = useMemo(() => {
     const ql = q.trim().toLowerCase()
     return data.orders
       .filter((o) => (month === 'all' ? true : monthKey(o.date) === month))
       .filter((o) => !ql || o.client.toLowerCase().includes(ql) || o.description.toLowerCase().includes(ql) || o.expenses.some((e) => e.name.toLowerCase().includes(ql)))
       .filter((o) => !onlyLoss || orderTotals(o, data.settings).profit < 0)
+      .filter((o) => type === 'all' || orderType(o) === type)
       .sort((a, b) => b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt))
-  }, [data, month, q, onlyLoss])
+  }, [data, month, q, onlyLoss, type])
   return (
     <Card>
       <div className="toolbar">
         <input type="text" placeholder={t('search')} value={q} onChange={(e) => setQ(e.target.value)} />
+        <select className="inline-select" value={type} onChange={(e) => setType(e.target.value as 'all' | 'moving' | 'sale')}>
+          <option value="all">{t('filter_all')}</option>
+          <option value="moving">{t('type_moving')}</option>
+          <option value="sale">{t('type_sale')}</option>
+        </select>
         <label className="check">
           <input type="checkbox" checked={onlyLoss} onChange={(e) => setOnlyLoss(e.target.checked)} /> {t('lossOrdersTitle')}
         </label>

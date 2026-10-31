@@ -1,4 +1,4 @@
-import type { AppData, ExpenseLine, MaterialPreset, OpexItem, Order } from './types'
+import type { AppData, ExpenseLine, MaterialPreset, OpexItem, Order, SalePreset } from './types'
 import metaSpend from '../public/data/meta-spend.json'
 
 /** Default materials with the unit prices used in the original spreadsheet. */
@@ -10,6 +10,15 @@ export const MATERIAL_PRESETS: MaterialPreset[] = [
   { name: 'პარკი მეტრობით', unitPrice: 3, unit: 'მეტრი' },
   { name: 'პენოპლასტი', unitPrice: 0, unit: 'ცალი' },
   { name: 'წებოვანა ლენტი', unitPrice: 9.17, unit: 'ცალი' },
+]
+
+/** Materials sold to customers: sale price and purchase cost per unit (from the spreadsheet and supplies). */
+export const SALE_PRESETS: SalePreset[] = [
+  { name: 'მუყაოს ყუთი', price: 8, unitCost: 5.5 },
+  { name: 'სტრეიჯი', price: 0, unitCost: 10 },
+  { name: 'ბუბლ პარკი', price: 0, unitCost: 3.5 },
+  { name: 'კალკა', price: 0, unitCost: 0.12 },
+  { name: 'წებოვანა ლენტი', price: 0, unitCost: 9.17 },
 ]
 
 export const LABOR_PRESETS = ['ხვიჩა (ტრანსპორტი)', 'ჩვენი დამხმარე', 'ალთუნაშვილი გია', 'ტრანსპორტი', 'ხელოსანი']
@@ -46,6 +55,20 @@ const order = (
   applyPayoutTax: !!opts.tax,
   expenses,
   note: opts.note,
+  createdAt: new Date(date + 'T12:00:00Z').toISOString(),
+})
+
+const sale = (date: string, name: string, qty: number, price: number, unitCost: number): Order => ({
+  id: id('sale'),
+  type: 'sale',
+  date,
+  client: 'გაყიდვა',
+  description: '',
+  revenue: qty * price,
+  vatIncluded: false,
+  applyPayoutTax: false,
+  expenses: [],
+  items: [{ id: id('si'), name, qty, price, unitCost }],
   createdAt: new Date(date + 'T12:00:00Z').toISOString(),
 })
 
@@ -122,6 +145,10 @@ export function seedData(): AppData {
       ]),
       order('2026-10-08', 'გადატანა', 'მაცივარი და სარეცხი მანქანა', 280, {}, [labor('ტრანსპორტი', 200)]),
       order('2026-10-15', 'გადატანა', 'ძაღლის ყუთი (საწყობში)', 200, {}, [labor('ტრანსპორტი', 70)]),
+      // მასალის გაყიდვა (Excel: „გაყიდული პროდუქცია")
+      sale('2026-09-25', 'მუყაოს ყუთი', 7, 8, 5.5),
+      sale('2026-10-05', 'მუყაოს ყუთი', 15, 8, 5.5),
+      sale('2026-10-18', 'მუყაოს ყუთი', 5, 8, 5.5),
     ],
     supplies: [
       { id: id('s'), supplier: 'შპს უნიბოქს', item: 'მუყაოს ყუთები 40x40x60', unit: 'ცალი', qty: 200, unitPrice: 5.5 },
@@ -139,11 +166,7 @@ export function seedData(): AppData {
       { id: id('s'), supplier: 'შპს რუდი N1', item: 'პარკი (20 მეტრი)', unit: 'მეტრი', qty: 20, unitPrice: 3 },
       { id: id('s'), supplier: '', item: 'ურიკა კიბის', unit: 'ცალი', qty: 2, unitPrice: 275 },
     ],
-    sales: [
-      { id: id('ps'), date: '2026-09-25', item: 'მუყაოს ყუთები', qty: 7, price: 8 },
-      { id: id('ps'), date: '2026-10-05', item: 'მუყაოს ყუთები', qty: 15, price: 8 },
-      { id: id('ps'), date: '2026-10-18', item: 'მუყაოს ყუთები', qty: 5, price: 8 },
-    ],
+    sales: [],
     opex: metaSpendItems(),
     storage: [
       { id: id('st'), client: 'მამუკას ავეჯი', description: 'ყუთები', monthlyFee: 500, active: true },

@@ -1,5 +1,15 @@
 import type { AppData, ExpenseLine, OpexItem, Order, Settings } from './types'
 
+export const orderType = (o: Order) => o.type ?? 'moving'
+
+export function saleRevenue(o: Order): number {
+  return round2((o.items ?? []).reduce((a, l) => a + (Number(l.qty) || 0) * (Number(l.price) || 0), 0))
+}
+
+export function saleCost(o: Order): number {
+  return round2((o.items ?? []).reduce((a, l) => a + (Number(l.qty) || 0) * (Number(l.unitCost) || 0), 0))
+}
+
 export const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36)
 
 export const monthKey = (iso: string) => iso.slice(0, 7)
@@ -35,10 +45,12 @@ export function orderTotals(o: Order, s: Settings): OrderTotals {
     else if (l.kind === 'other') other += a
     else materials += a
   }
+  const isSale = orderType(o) === 'sale'
+  if (isSale) materials += saleCost(o)
   const payouts = labor + other
   const tax = o.applyPayoutTax ? payouts * (s.payoutTaxRate / 100) : 0
   const totalExpense = payouts + tax + materials
-  const grossRevenue = Number(o.revenue) || 0
+  const grossRevenue = isSale ? saleRevenue(o) : Number(o.revenue) || 0
   const netRevenue = o.vatIncluded ? grossRevenue / (1 + s.vatRate / 100) : grossRevenue
   const vat = grossRevenue - netRevenue
   const profit = netRevenue - totalExpense
@@ -77,13 +89,18 @@ export interface MonthReport {
   tax: number
   materials: number
   other: number
+  /** Net revenue of 'sale' orders. */
   boxSales: number
+  movingProfit: number
+  saleProfit: number
+  movingOrders: number
+  saleOrders: number
   storage: number
   supplies: number
   /** Operating expenses (ads etc.) converted to GEL. */
   ads: number
   opexOther: number
-  /** profit + storage + product sales − ads − other operating expenses */
+  /** profit (moving + sales) + storage − ads − other operating expenses */
   netResult: number
 }
 
@@ -109,6 +126,10 @@ export function monthReports(data: AppData): MonthReport[] {
         materials: 0,
         other: 0,
         boxSales: 0,
+        movingProfit: 0,
+        saleProfit: 0,
+        movingOrders: 0,
+        saleOrders: 0,
         storage: 0,
         supplies: 0,
         ads: 0,
@@ -135,8 +156,15 @@ export function monthReports(data: AppData): MonthReport[] {
     r.tax += t.tax
     r.materials += t.materials
     r.other += t.otherCosts
+    if (orderType(o) === 'sale') {
+      r.saleOrders++
+      r.saleProfit += t.profit
+      r.boxSales += t.netRevenue
+    } else {
+      r.movingOrders++
+      r.movingProfit += t.profit
+    }
   }
-  for (const s of data.sales) get(monthKey(s.date)).boxSales += s.qty * s.price
   for (const s of data.supplies) if (s.date) get(monthKey(s.date)).supplies += s.qty * s.unitPrice
   for (const x of data.opex) {
     const r = get(monthKey(x.date))
@@ -148,7 +176,7 @@ export function monthReports(data: AppData): MonthReport[] {
     r.storage = storageMonthly
     r.profitShare = r.profit * (data.settings.profitSharePct / 100)
     r.remaining = r.profit - r.profitShare
-    r.netResult = r.profit + r.storage + r.boxSales - r.ads - r.opexOther
+    r.netResult = r.profit + r.storage - r.ads - r.opexOther
     for (const k of Object.keys(r) as (keyof MonthReport)[]) {
       if (typeof r[k] === 'number') (r as unknown as Record<string, number>)[k] = round2(r[k] as number)
     }

@@ -1,6 +1,6 @@
 import * as XLSX from 'xlsx'
 import type { AppData } from './types'
-import { fmtDate, fmtMonth, lineAmount, monthKey, monthReports, opexGel, orderTotals } from './calc'
+import { fmtDate, fmtMonth, lineAmount, monthKey, monthReports, opexGel, orderTotals, orderType } from './calc'
 
 function download(blob: Blob, name: string) {
   const a = document.createElement('a')
@@ -34,7 +34,8 @@ export function exportXlsx(data: AppData) {
       const t = orderTotals(o, s)
       rows.push([`შეკვეთა N - ${i + 1}`])
       rows.push(['დამკვეთი / შესრულება', 'გამოყენებული მასალა', 'შესრულების თარიღი', 'ჩარიცხული თანხა', 'გადარიცხული თანხა', 'კომენტარი'])
-      rows.push([o.client, '', fmtDate(o.date), o.revenue, '', o.description])
+      rows.push([o.client, '', fmtDate(o.date), t.grossRevenue, '', o.description])
+      for (const i of o.items ?? []) rows.push([`${i.name} × ${i.qty} × ${i.price}`, i.qty * i.unitCost, '', i.qty * i.price, '', 'გაყიდული მასალა'])
       for (const l of o.expenses) {
         if (l.kind === 'material') rows.push([l.name, lineAmount(l), '', '', '', l.qty != null ? `${l.qty} x ${l.unitPrice}` : ''])
         else rows.push([l.name, '', '', '', lineAmount(l), l.comment ?? ''])
@@ -74,10 +75,14 @@ export function exportXlsx(data: AppData) {
     ['Total Payments', '', '', '', '', data.supplies.reduce((a, x) => a + x.qty * x.unitPrice, 0)],
   ]
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sup), 'საწყობი - მარაგები')
+  const saleRows = data.orders
+    .filter((o) => orderType(o) === 'sale')
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .flatMap((o) => (o.items ?? []).map((i) => [fmtDate(o.date), i.name, i.qty, i.price, i.qty * i.price, i.unitCost, i.qty * (i.price - i.unitCost)]))
   const sales = [
-    ['თარიღი', 'დასახელება', 'რაოდენობა', 'ფასი', 'ჯამი (ლარი)'],
-    ...data.sales.map((x) => [fmtDate(x.date), x.item, x.qty, x.price, x.qty * x.price]),
-    ['', '', data.sales.reduce((a, x) => a + x.qty, 0), '', data.sales.reduce((a, x) => a + x.qty * x.price, 0)],
+    ['თარიღი', 'დასახელება', 'რაოდენობა', 'ფასი', 'ჯამი (ლარი)', 'თვითღირებულება', 'მოგება'],
+    ...saleRows,
+    ['', '', saleRows.reduce((a, x) => a + Number(x[2]), 0), '', saleRows.reduce((a, x) => a + Number(x[4]), 0), '', saleRows.reduce((a, x) => a + Number(x[6]), 0)],
   ]
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sales), 'გაყიდული პროდუქცია')
   const st = [

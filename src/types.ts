@@ -11,8 +11,25 @@ export interface ExpenseLine {
   comment?: string
 }
 
+export type OrderType = 'moving' | 'sale'
+
+/** A line of material sold in a 'sale' order. */
+export interface SaleLine {
+  id: string
+  name: string
+  qty: number
+  /** Sale price per unit. */
+  price: number
+  /** Purchase cost per unit (cost of goods). */
+  unitCost: number
+}
+
 export interface Order {
   id: string
+  /** 'moving' (transport / relocation job) or 'sale' (selling packing materials). Missing = moving. */
+  type?: OrderType
+  /** Sold items for 'sale' orders; revenue is derived from them. */
+  items?: SaleLine[]
   /** ISO date (YYYY-MM-DD) when the job was completed. */
   date: string
   client: string
@@ -94,4 +111,10 @@ export interface MaterialPreset {
   name: string
   unitPrice: number
   unit: string
+}
+
+export interface SalePreset {
+  name: string
+  price: number
+  unitCost: number
 }
