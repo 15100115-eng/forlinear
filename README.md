@@ -35,6 +35,18 @@ Excel-ის ყველა არსებული ჩანაწერი (
 
 > შენიშვნა: API აბრუნებს **დახარჯულ** თანხას დღეების მიხედვით, ბილინგის ფაილი კი **ბარათიდან ჩამოჭრილ** გადახდებს. ერთსა და იმავე პერიოდზე ორივე წყარო არ გამოიყენოთ, თორემ ხარჯი გაორმაგდება.
 
+## განთავსება (Vercel)
+
+პროდაქშენი: https://nextmove-finance.vercel.app (Vercel პროექტი `nextmove-finance`).
+
+ამჟამად პროექტი GitHub-თან დაკავშირებული არ არის (Vercel-ის GitHub ინტეგრაცია არ არის დაყენებული), ამიტომ build-ის install ბრძანება თავად იღებს კოდს ბრენჩიდან:
+
+```
+curl -sL https://github.com/15100115-eng/forlinear/archive/refs/heads/finance-dashboard.tar.gz | tar xz --strip-components=1 && npm install
+```
+
+ახალი ვერსიის გასაშვებად საკმარისია Vercel-ში „Redeploy". უმჯობესია Vercel → Project → Settings → Git-ში დააკავშიროთ GitHub რეპო — მაშინ ყოველი push ავტომატურად განთავსდება და install ბრძანება შეგიძლიათ ისევ `npm install`-ზე დააბრუნოთ.
+
 ## გაშვება
 
 ```bash
