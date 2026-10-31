@@ -49,7 +49,8 @@ export function Dashboard({
   const opexScoped = data.opex.filter((x) => month === 'all' || monthKey(x.date) === month)
   const ads = opexScoped.filter((x) => x.category === 'ads').reduce((a, x) => a + opexGel(x, data.settings), 0)
   const opexOther = opexScoped.filter((x) => x.category !== 'ads').reduce((a, x) => a + opexGel(x, data.settings), 0)
-  const netResult = profit - ads - opexOther
+  const otherIncome = storageMonthly * monthsCount + boxSales
+  const netResult = profit + otherIncome - ads - opexOther
   const deltaNet = cur && prev ? cur.netResult - prev.netResult : null
   const profitShare = profit * (data.settings.profitSharePct / 100)
 
@@ -73,7 +74,7 @@ export function Dashboard({
         <StatTile label={t('kpi_remaining')} value={fmtMoney(profit - profitShare)} sub={`${t('kpi_profitShare')} ${data.settings.profitSharePct}%: ${fmtMoney(profitShare)}`} />
         <StatTile label={t('kpi_ads')} value={fmtMoney(ads)} delta={cur && prev ? cur.ads - prev.ads : null} deltaLabel={t('vsPrev')} upIsGood={false} sub={scoped.length ? `${t('adsPerOrder')}: ${fmtMoney(ads / scoped.length)}` : undefined} />
         <StatTile label={t('kpi_netResult')} value={fmtMoney(netResult)} delta={deltaNet} deltaLabel={t('vsPrev')} sub={t('kpi_netResult_sub')} />
-        <StatTile label={t('kpi_otherIncome')} value={fmtMoney(storageMonthly * monthsCount + boxSales)} sub={`${t('series_storage')} ${fmtMoney(storageMonthly)}/${t('month').toLowerCase()} · ${t('series_boxSales')} ${fmtMoney(boxSales)}`} />
+        <StatTile label={t('kpi_otherIncome')} value={fmtMoney(otherIncome)} sub={`${t('series_storage')} ${fmtMoney(storageMonthly)}/${t('month').toLowerCase()} · ${t('series_boxSales')} ${fmtMoney(boxSales)}`} />
       </div>
 
       <div className="grid three section">

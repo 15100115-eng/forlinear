@@ -83,7 +83,7 @@ export interface MonthReport {
   /** Operating expenses (ads etc.) converted to GEL. */
   ads: number
   opexOther: number
-  /** profit − ads − other operating expenses */
+  /** profit + storage + product sales − ads − other operating expenses */
   netResult: number
 }
 
@@ -148,7 +148,7 @@ export function monthReports(data: AppData): MonthReport[] {
     r.storage = storageMonthly
     r.profitShare = r.profit * (data.settings.profitSharePct / 100)
     r.remaining = r.profit - r.profitShare
-    r.netResult = r.profit - r.ads - r.opexOther
+    r.netResult = r.profit + r.storage + r.boxSales - r.ads - r.opexOther
     for (const k of Object.keys(r) as (keyof MonthReport)[]) {
       if (typeof r[k] === 'number') (r as unknown as Record<string, number>)[k] = round2(r[k] as number)
     }
