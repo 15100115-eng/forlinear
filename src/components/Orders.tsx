@@ -39,7 +39,39 @@ export function OrdersTable({
   const sumExp = rows.reduce((a, r) => a + r.tt.totalExpense, 0)
   const sumProfit = rows.reduce((a, r) => a + r.tt.profit, 0)
   return (
-    <div className="table-wrap">
+    <>
+    <div className="order-cards">
+      {rows.map(({ o, tt }) => (
+        <div className="order-card" key={o.id} onClick={() => onEdit(o)}>
+          <div className="oc-top">
+            <div className="oc-client">
+              <span className="muted">#{seq.get(o.id)}</span> {o.client}
+              {tt.profit < 0 && <span className="badge loss">{t('loss_badge')}</span>}
+            </div>
+            <div className={`oc-profit ${tt.profit < 0 ? 'neg' : 'pos'}`}>{tt.profit < 0 ? '−' : '+'}{Math.abs(tt.profit).toLocaleString(undefined, { maximumFractionDigits: 0 })} ₾</div>
+          </div>
+          {o.description && <div className="oc-desc">{o.description}</div>}
+          <div className="oc-meta">
+            <span>{fmtDate(o.date)}</span>
+            <span>{t('col_revenue')} {tt.grossRevenue.toLocaleString()}</span>
+            <span>{t('col_expense')} {tt.totalExpense.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+            {!compact && (onDelete || onDuplicate) && (
+              <span className="oc-actions" onClick={(e) => e.stopPropagation()}>
+                {onDuplicate && <button className="icon-btn" title={t('duplicate')} onClick={() => onDuplicate(o)}>⧉</button>}
+                {onDelete && <button className="icon-btn danger" title={t('delete')} onClick={() => confirm(t('confirmDelete')) && onDelete(o)}>🗑</button>}
+              </span>
+            )}
+          </div>
+        </div>
+      ))}
+      {!compact && rows.length > 1 && (
+        <div className="order-card total-card">
+          <span>{t('total')} · {rows.length}</span>
+          <Money v={sumProfit} />
+        </div>
+      )}
+    </div>
+    <div className="table-wrap desktop-only">
       <table>
         <thead>
           <tr>
@@ -97,6 +129,7 @@ export function OrdersTable({
         </tbody>
       </table>
     </div>
+    </>
   )
 }
 

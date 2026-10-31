@@ -1,4 +1,4 @@
-import type { AppData, ExpenseLine, Order, Settings } from './types'
+import type { AppData, ExpenseLine, OpexItem, Order, Settings } from './types'
 
 export const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36)
 
@@ -57,6 +57,10 @@ export function orderTotals(o: Order, s: Settings): OrderTotals {
   }
 }
 
+export function opexGel(x: OpexItem, s: Settings): number {
+  return round2(x.currency === 'USD' ? x.amount * s.usdRate : x.amount)
+}
+
 export interface MonthReport {
   month: string
   orders: number
@@ -76,6 +80,11 @@ export interface MonthReport {
   boxSales: number
   storage: number
   supplies: number
+  /** Operating expenses (ads etc.) converted to GEL. */
+  ads: number
+  opexOther: number
+  /** profit − ads − other operating expenses */
+  netResult: number
 }
 
 export function monthReports(data: AppData): MonthReport[] {
@@ -102,6 +111,9 @@ export function monthReports(data: AppData): MonthReport[] {
         boxSales: 0,
         storage: 0,
         supplies: 0,
+        ads: 0,
+        opexOther: 0,
+        netResult: 0,
       }
       map.set(m, r)
     }
@@ -126,11 +138,17 @@ export function monthReports(data: AppData): MonthReport[] {
   }
   for (const s of data.sales) get(monthKey(s.date)).boxSales += s.qty * s.price
   for (const s of data.supplies) if (s.date) get(monthKey(s.date)).supplies += s.qty * s.unitPrice
+  for (const x of data.opex) {
+    const r = get(monthKey(x.date))
+    if (x.category === 'ads') r.ads += opexGel(x, data.settings)
+    else r.opexOther += opexGel(x, data.settings)
+  }
   const storageMonthly = data.storage.filter((s) => s.active).reduce((a, s) => a + s.monthlyFee, 0)
   for (const r of map.values()) {
     r.storage = storageMonthly
     r.profitShare = r.profit * (data.settings.profitSharePct / 100)
     r.remaining = r.profit - r.profitShare
+    r.netResult = r.profit - r.ads - r.opexOther
     for (const k of Object.keys(r) as (keyof MonthReport)[]) {
       if (typeof r[k] === 'number') (r as unknown as Record<string, number>)[k] = round2(r[k] as number)
     }

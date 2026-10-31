@@ -11,6 +11,7 @@ export function useColors() {
     s3: css('--s3') || '#1baf7a',
     s4: css('--s4') || '#eda100',
     s5: css('--s5') || '#e87ba4',
+    s7: css('--s7') || '#6250d6',
     critical: css('--critical') || '#d03b3b',
     grid: css('--grid') || '#e1e0d9',
     axis: css('--axis') || '#c3c2b7',

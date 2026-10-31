@@ -11,8 +11,9 @@ import { Analytics } from './components/Analytics'
 import { IncomePage } from './components/Income'
 import { SuppliesPage } from './components/Supplies'
 import { SettingsPage } from './components/Settings'
+import { OpexPage } from './components/Opex'
 
-type Page = 'dashboard' | 'orders' | 'analytics' | 'income' | 'supplies' | 'settings'
+type Page = 'dashboard' | 'orders' | 'analytics' | 'income' | 'opex' | 'supplies' | 'settings'
 
 export default function App() {
   const { data, update, setData } = useAppData()
@@ -21,6 +22,7 @@ export default function App() {
   const [page, setPage] = useState<Page>('dashboard')
   const [monthSel, setMonth] = useState<string>('all')
   const [form, setForm] = useState<{ open: boolean; order?: Order }>({ open: false })
+  const [more, setMore] = useState(false)
 
   useEffect(() => {
     const th = data.settings.theme
@@ -51,10 +53,18 @@ export default function App() {
     { id: 'orders', label: t('nav_orders'), icon: Icons.orders },
     { id: 'analytics', label: t('nav_analytics'), icon: Icons.analytics },
     { id: 'income', label: t('nav_income'), icon: Icons.income },
+    { id: 'opex', label: t('nav_opex'), icon: Icons.ads },
     { id: 'supplies', label: t('nav_supplies'), icon: Icons.supplies },
     { id: 'settings', label: t('nav_settings'), icon: Icons.settings },
   ]
   const showMonth = page === 'dashboard' || page === 'orders' || page === 'analytics'
+  const primaryNav = nav.slice(0, 4)
+  const moreNav = nav.slice(4)
+  const go = (p: Page) => {
+    setPage(p)
+    setMore(false)
+    window.scrollTo({ top: 0 })
+  }
 
   return (
     <div className="app">
@@ -87,7 +97,7 @@ export default function App() {
                 ))}
               </select>
             )}
-            <button className="btn primary" onClick={() => setForm({ open: true })}>
+            <button className="btn primary topbar-add" onClick={() => setForm({ open: true })}>
               {t('addOrder')}
             </button>
           </div>
@@ -97,9 +107,35 @@ export default function App() {
         {page === 'orders' && <OrdersPage data={data} t={t} lang={lang} month={month} onEdit={(o) => setForm({ open: true, order: o })} onDelete={deleteOrder} onDuplicate={duplicateOrder} />}
         {page === 'analytics' && <Analytics data={data} t={t} lang={lang} month={month} />}
         {page === 'income' && <IncomePage data={data} t={t} update={update} />}
+        {page === 'opex' && <OpexPage data={data} t={t} lang={lang} update={update} />}
         {page === 'supplies' && <SuppliesPage data={data} t={t} update={update} />}
         {page === 'settings' && <SettingsPage data={data} t={t} update={update} setData={setData} />}
       </main>
+
+      <nav className="bottom-nav" aria-label="navigation">
+        {primaryNav.map((n) => (
+          <button key={n.id} className={`tab ${page === n.id ? 'active' : ''}`} onClick={() => go(n.id)}>
+            {n.icon}
+            <span>{n.label}</span>
+          </button>
+        ))}
+        <button className={`tab ${moreNav.some((n) => n.id === page) || more ? 'active' : ''}`} onClick={() => setMore((m) => !m)}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="5" cy="12" r="1.5" /><circle cx="12" cy="12" r="1.5" /><circle cx="19" cy="12" r="1.5" /></svg>
+          <span>{t('more')}</span>
+        </button>
+      </nav>
+      {more && (
+        <div className="sheet-bg" onClick={() => setMore(false)}>
+          <div className="sheet" onClick={(e) => e.stopPropagation()}>
+            {moreNav.map((n) => (
+              <button key={n.id} className={`nav-btn ${page === n.id ? 'active' : ''}`} onClick={() => go(n.id)}>
+                {n.icon} {n.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+      <button className="fab" onClick={() => setForm({ open: true })} aria-label={t('addOrder')}>+</button>
 
       {form.open && <OrderForm key={form.order?.id ?? 'new'} initial={form.order} settings={data.settings} t={t} onSave={saveOrder} onClose={closeForm} clients={clients} />}
     </div>

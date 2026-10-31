@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import type { AppData, Order } from '../types'
-import { fmtMoney, fmtMonth, fmtPct, monthKey, monthReports, orderTotals } from '../calc'
+import { fmtMoney, fmtMonth, fmtPct, monthKey, monthReports, opexGel, orderTotals } from '../calc'
 import type { Lang, TKey } from '../i18n'
 import { Card, StatTile } from './ui'
 import { GroupedBars, HorizontalBars, SegmentedBar, SignedBars, useColors } from './charts'
@@ -46,9 +46,14 @@ export function Dashboard({
   const storageMonthly = data.storage.filter((s) => s.active).reduce((a, s) => a + s.monthlyFee, 0)
   const boxSales = data.sales.filter((s) => month === 'all' || monthKey(s.date) === month).reduce((a, s) => a + s.qty * s.price, 0)
   const monthsCount = month === 'all' ? Math.max(1, reports.length) : 1
+  const opexScoped = data.opex.filter((x) => month === 'all' || monthKey(x.date) === month)
+  const ads = opexScoped.filter((x) => x.category === 'ads').reduce((a, x) => a + opexGel(x, data.settings), 0)
+  const opexOther = opexScoped.filter((x) => x.category !== 'ads').reduce((a, x) => a + opexGel(x, data.settings), 0)
+  const netResult = profit - ads - opexOther
+  const deltaNet = cur && prev ? cur.netResult - prev.netResult : null
   const profitShare = profit * (data.settings.profitSharePct / 100)
 
-  const monthlyData = reports.map((r) => ({ m: fmtMonth(r.month, lang), netRevenue: r.netRevenue, expenses: r.expenses, profit: r.profit }))
+  const monthlyData = reports.map((r) => ({ m: fmtMonth(r.month, lang), netRevenue: r.netRevenue, expenses: r.expenses, profit: r.profit, ads: r.ads }))
   const byOrder = totals.map(({ o, t }, i) => ({ n: String(i + 1), client: o.client, profit: t.profit, date: o.date }))
 
   const clients = useMemo(() => {
@@ -66,6 +71,8 @@ export function Dashboard({
         <StatTile label={t('kpi_orders')} value={String(scoped.length)} sub={`${t('kpi_lossOrders')}: ${lossOrders.length}`} />
         <StatTile label={t('kpi_avgProfit')} value={fmtMoney(scoped.length ? profit / scoped.length : 0)} sub={`${t('kpi_margin')}: ${fmtPct(netRevenue ? profit / netRevenue : 0)}`} />
         <StatTile label={t('kpi_remaining')} value={fmtMoney(profit - profitShare)} sub={`${t('kpi_profitShare')} ${data.settings.profitSharePct}%: ${fmtMoney(profitShare)}`} />
+        <StatTile label={t('kpi_ads')} value={fmtMoney(ads)} delta={cur && prev ? cur.ads - prev.ads : null} deltaLabel={t('vsPrev')} upIsGood={false} sub={scoped.length ? `${t('adsPerOrder')}: ${fmtMoney(ads / scoped.length)}` : undefined} />
+        <StatTile label={t('kpi_netResult')} value={fmtMoney(netResult)} delta={deltaNet} deltaLabel={t('vsPrev')} sub={t('kpi_netResult_sub')} />
         <StatTile label={t('kpi_otherIncome')} value={fmtMoney(storageMonthly * monthsCount + boxSales)} sub={`${t('series_storage')} ${fmtMoney(storageMonthly)}/${t('month').toLowerCase()} · ${t('series_boxSales')} ${fmtMoney(boxSales)}`} />
       </div>
 
@@ -79,19 +86,22 @@ export function Dashboard({
                 { key: 'netRevenue', label: t('series_netRevenue'), color: c.s1 },
                 { key: 'expenses', label: t('series_expenses'), color: c.s2 },
                 { key: 'profit', label: t('series_profit'), color: c.s3 },
+                { key: 'ads', label: t('series_ads'), color: c.s4 },
               ]}
             />
           ) : (
             <div className="empty">{t('noData')}</div>
           )}
         </Card>
-        <Card title={t('chart_expenseBreakdown')} sub={fmtMoney(expenses)}>
+        <Card title={t('chart_expenseBreakdown')} sub={fmtMoney(expenses + ads + opexOther)}>
           <SegmentedBar
             parts={[
               { label: t('cat_labor'), value: labor, color: c.s1 },
               { label: t('cat_tax'), value: tax, color: c.s2 },
               { label: t('cat_materials'), value: materials, color: c.s3 },
               { label: t('cat_other'), value: other, color: c.s4, darkInk: true },
+              { label: t('cat_ads'), value: ads, color: c.s5 },
+              { label: t('cat_opexOther'), value: opexOther, color: c.s7 },
             ]}
           />
         </Card>

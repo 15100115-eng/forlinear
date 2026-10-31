@@ -1,6 +1,6 @@
 import * as XLSX from 'xlsx'
 import type { AppData } from './types'
-import { fmtDate, fmtMonth, lineAmount, monthKey, monthReports, orderTotals } from './calc'
+import { fmtDate, fmtMonth, lineAmount, monthKey, monthReports, opexGel, orderTotals } from './calc'
 
 function download(blob: Blob, name: string) {
   const a = document.createElement('a')
@@ -50,8 +50,8 @@ export function exportXlsx(data: AppData) {
     const r = monthReports(data).find((x) => x.month === m)
     if (r) {
       rows.push([`${fmtMonth(m, 'ka', true)} - რეპორტი`])
-      rows.push(['თვე', 'შეკვეთების რაოდენობა', 'წამგებიანი შეკვეთა', 'მომგებიანი შეკვეთა', 'მოგება', `PROFIT SHARE - ${s.profitSharePct}%`, 'დარჩენილი მოგება'])
-      rows.push([fmtMonth(m, 'ka', true), r.orders, r.lossTotal, r.profitableTotal, r.profit, r.profitShare, r.remaining])
+      rows.push(['თვე', 'შეკვეთების რაოდენობა', 'წამგებიანი შეკვეთა', 'მომგებიანი შეკვეთა', 'მოგება', `PROFIT SHARE - ${s.profitSharePct}%`, 'დარჩენილი მოგება', 'რეკლამა (Meta Ads)', 'საბოლოო შედეგი'])
+      rows.push([fmtMonth(m, 'ka', true), r.orders, r.lossTotal, r.profitableTotal, r.profit, r.profitShare, r.remaining, r.ads + r.opexOther, r.netResult])
     }
     const ws = XLSX.utils.aoa_to_sheet(rows)
     ws['!cols'] = [{ wch: 38 }, { wch: 14 }, { wch: 16 }, { wch: 16 }, { wch: 18 }, { wch: 50 }]
@@ -86,6 +86,12 @@ export function exportXlsx(data: AppData) {
     ['', '', data.storage.filter((x) => x.active).reduce((a, x) => a + x.monthlyFee, 0)],
   ]
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(st), 'საწყობის შემოსავალი')
+  const opex = [
+    ['თარიღი', 'კატეგორია', 'აღწერა', 'თანხა', 'ვალუტა', 'ლარში', 'ტრანზაქცია'],
+    ...[...data.opex].sort((a, b) => a.date.localeCompare(b.date)).map((x) => [fmtDate(x.date), x.category === 'ads' ? 'რეკლამა (Meta Ads)' : 'სხვა', x.description, x.amount, x.currency, opexGel(x, s), x.ref ?? '']),
+    ['', '', 'TOTAL', '', '', data.opex.reduce((a, x) => a + opexGel(x, s), 0)],
+  ]
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(opex), 'მარკეტინგი - ხარჯები')
   const out = XLSX.write(wb, { bookType: 'xlsx', type: 'array' })
   download(new Blob([out], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), `NEXT_MOVE_FINANCIAL_${new Date().toISOString().slice(0, 10)}.xlsx`)
 }

@@ -21,7 +21,7 @@ export function IncomePage({ data, t, update }: { data: AppData; t: T; update: (
         sub={`${t('storage_total')}: ${fmtMoney(storageTotal)}`}
         right={<button className="btn sm primary" onClick={() => setEditStorage({ id: uid(), client: '', description: '', monthlyFee: 0, active: true, since: todayIso() })}>{t('addStorage')}</button>}
       >
-        <table>
+        <div className="table-wrap"><table>
           <thead>
             <tr>
               <th>{t('col_client')}</th>
@@ -44,7 +44,7 @@ export function IncomePage({ data, t, update }: { data: AppData; t: T; update: (
               </tr>
             ))}
           </tbody>
-        </table>
+        </table></div>
       </Card>
 
       <Card
@@ -52,7 +52,7 @@ export function IncomePage({ data, t, update }: { data: AppData; t: T; update: (
         sub={`${t('sales_total')}: ${salesQty} · ${fmtMoney(salesTotal)}`}
         right={<button className="btn sm primary" onClick={() => setEditSale({ id: uid(), date: todayIso(), item: 'მუყაოს ყუთები', qty: 1, price: 8 })}>{t('addSale')}</button>}
       >
-        <table>
+        <div className="table-wrap"><table>
           <thead>
             <tr>
               <th>{t('col_date')}</th>
@@ -77,7 +77,7 @@ export function IncomePage({ data, t, update }: { data: AppData; t: T; update: (
               </tr>
             ))}
           </tbody>
-        </table>
+        </table></div>
       </Card>
 
       {editSale && (

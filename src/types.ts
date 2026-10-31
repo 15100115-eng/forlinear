@@ -56,7 +56,23 @@ export interface StorageClient {
   since?: string
 }
 
+export type OpexCategory = 'ads' | 'other'
+
+/** Operating (non-order) expense, e.g. a Meta Ads card payment. */
+export interface OpexItem {
+  id: string
+  date: string
+  category: OpexCategory
+  amount: number
+  currency: 'USD' | 'GEL'
+  description: string
+  /** External reference (e.g. Meta transaction ID) used for de-duplication on import. */
+  ref?: string
+}
+
 export interface Settings {
+  /** GEL per 1 USD, used to convert USD expenses. */
+  usdRate: number
   payoutTaxRate: number // percent, default 30
   vatRate: number // percent, default 18
   profitSharePct: number // percent, default 15
@@ -70,6 +86,7 @@ export interface AppData {
   supplies: Supply[]
   sales: ProductSale[]
   storage: StorageClient[]
+  opex: OpexItem[]
   settings: Settings
 }
 

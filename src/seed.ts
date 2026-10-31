@@ -1,4 +1,5 @@
 import type { AppData, ExpenseLine, MaterialPreset, Order } from './types'
+import { META_ADS_SEED } from './seedMeta'
 
 /** Default materials with the unit prices used in the original spreadsheet. */
 export const MATERIAL_PRESETS: MaterialPreset[] = [
@@ -52,7 +53,7 @@ export function seedData(): AppData {
   n = 0
   return {
     version: 1,
-    settings: { payoutTaxRate: 30, vatRate: 18, profitSharePct: 15, lang: 'ka', theme: 'system' },
+    settings: { usdRate: 2.7, payoutTaxRate: 30, vatRate: 18, profitSharePct: 15, lang: 'ka', theme: 'system' },
     orders: [
       // სექტემბერი 2026
       order(
@@ -128,6 +129,15 @@ export function seedData(): AppData {
       { id: id('ps'), date: '2026-10-05', item: 'მუყაოს ყუთები', qty: 15, price: 8 },
       { id: id('ps'), date: '2026-10-18', item: 'მუყაოს ყუთები', qty: 5, price: 8 },
     ],
+    opex: META_ADS_SEED.map((x) => ({
+      id: id('ad'),
+      date: x.date,
+      category: 'ads' as const,
+      amount: x.amount,
+      currency: 'USD' as const,
+      description: 'Meta Ads',
+      ref: x.ref,
+    })),
     storage: [
       { id: id('st'), client: 'მამუკას ავეჯი', description: 'ყუთები', monthlyFee: 500, active: true },
       { id: id('st'), client: 'ოკტოპუსი', description: '13 ცალი', monthlyFee: 400, active: true },

@@ -15,6 +15,7 @@ export function SettingsPage({ data, t, update, setData }: { data: AppData; t: (
         <div className="settings-grid">
           <label className="field">{t('set_tax')}<input type="number" min={0} max={100} value={s.payoutTaxRate} onChange={(e) => set({ payoutTaxRate: Number(e.target.value) })} /></label>
           <label className="field">{t('set_vat')}<input type="number" min={0} max={100} value={s.vatRate} onChange={(e) => set({ vatRate: Number(e.target.value) })} /></label>
+          <label className="field">{t('set_usdRate')}<input type="number" min={0} step="0.01" value={s.usdRate} onChange={(e) => set({ usdRate: Number(e.target.value) })} /></label>
           <label className="field">{t('set_share')}<input type="number" min={0} max={100} value={s.profitSharePct} onChange={(e) => set({ profitSharePct: Number(e.target.value) })} /></label>
           <label className="field">{t('set_lang')}
             <select value={s.lang} onChange={(e) => set({ lang: e.target.value as Settings['lang'] })}>

@@ -41,13 +41,13 @@ export function Analytics({ data, t, lang, month }: { data: AppData; t: (k: TKey
   }, [scoped])
 
   const trend = reports.map((r) => ({ m: fmtMonth(r.month, lang), labor: r.labor, tax: r.tax, materials: r.materials, other: r.other }))
-  const streams = reports.map((r) => ({ m: fmtMonth(r.month, lang), profit: r.profit, storage: r.storage, boxSales: r.boxSales }))
+  const streams = reports.map((r) => ({ m: fmtMonth(r.month, lang), profit: r.profit, storage: r.storage, boxSales: r.boxSales, ads: r.ads }))
 
   return (
     <>
       <Card title={t('report_title')}>
         <div className="table-wrap">
-          <table>
+          <div className="table-wrap"><table>
             <thead>
               <tr>
                 <th>{t('month')}</th>
@@ -60,6 +60,8 @@ export function Analytics({ data, t, lang, month }: { data: AppData; t: (k: TKey
                 <th className="num">{t('col_margin')}</th>
                 <th className="num">{t('report_share')} {data.settings.profitSharePct}%</th>
                 <th className="num">{t('report_remaining')}</th>
+                <th className="num">{t('report_ads')}</th>
+                <th className="num">{t('report_netResult')}</th>
               </tr>
             </thead>
             <tbody>
@@ -75,6 +77,8 @@ export function Analytics({ data, t, lang, month }: { data: AppData; t: (k: TKey
                   <td className="num muted">{fmtPct(r.netRevenue ? r.profit / r.netRevenue : 0)}</td>
                   <td className="num">{r.profitShare.toLocaleString()}</td>
                   <td className="num"><Money v={r.remaining} /></td>
+                  <td className="num">{(r.ads + r.opexOther).toLocaleString()}</td>
+                  <td className="num"><Money v={r.netResult} /></td>
                 </tr>
               ))}
               {reports.length > 1 && (
@@ -89,10 +93,12 @@ export function Analytics({ data, t, lang, month }: { data: AppData; t: (k: TKey
                   <td className="num"></td>
                   <td className="num">{reports.reduce((a, r) => a + r.profitShare, 0).toLocaleString()}</td>
                   <td className="num"><Money v={reports.reduce((a, r) => a + r.remaining, 0)} /></td>
+                  <td className="num">{reports.reduce((a, r) => a + r.ads + r.opexOther, 0).toLocaleString()}</td>
+                  <td className="num"><Money v={reports.reduce((a, r) => a + r.netResult, 0)} /></td>
                 </tr>
               )}
             </tbody>
-          </table>
+          </table></div>
         </div>
       </Card>
 
@@ -117,6 +123,7 @@ export function Analytics({ data, t, lang, month }: { data: AppData; t: (k: TKey
               { key: 'profit', label: t('series_profit'), color: c.s1 },
               { key: 'storage', label: t('series_storage'), color: c.s2 },
               { key: 'boxSales', label: t('series_boxSales'), color: c.s3 },
+              { key: 'ads', label: t('series_ads'), color: c.s4 },
             ]}
           />
         </Card>
@@ -125,7 +132,7 @@ export function Analytics({ data, t, lang, month }: { data: AppData; t: (k: TKey
       <div className="grid two section">
         <Card title={t('clients_title')}>
           <div className="table-wrap">
-            <table>
+            <div className="table-wrap"><table>
               <thead>
                 <tr>
                   <th>{t('col_client')}</th>
@@ -147,7 +154,7 @@ export function Analytics({ data, t, lang, month }: { data: AppData; t: (k: TKey
                 ))}
                 {!clients.length && <tr><td colSpan={5} className="empty">{t('noData')}</td></tr>}
               </tbody>
-            </table>
+            </table></div>
           </div>
         </Card>
         <div className="grid" style={{ gap: 16 }}>
@@ -155,7 +162,7 @@ export function Analytics({ data, t, lang, month }: { data: AppData; t: (k: TKey
             {payees.length ? <HorizontalBars data={payees} valueKey="amount" labelKey="name" color={c.s2} /> : <div className="empty">{t('noData')}</div>}
           </Card>
           <Card title={t('materials_usage')}>
-            <table>
+            <div className="table-wrap"><table>
               <thead>
                 <tr>
                   <th>{t('col_item')}</th>
@@ -173,7 +180,7 @@ export function Analytics({ data, t, lang, month }: { data: AppData; t: (k: TKey
                 ))}
                 {!materials.length && <tr><td colSpan={3} className="empty">{t('noData')}</td></tr>}
               </tbody>
-            </table>
+            </table></div>
           </Card>
         </div>
       </div>
