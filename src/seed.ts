@@ -1,5 +1,5 @@
-import type { AppData, ExpenseLine, MaterialPreset, Order } from './types'
-import { META_ADS_SEED } from './seedMeta'
+import type { AppData, ExpenseLine, MaterialPreset, OpexItem, Order } from './types'
+import metaSpend from '../public/data/meta-spend.json'
 
 /** Default materials with the unit prices used in the original spreadsheet. */
 export const MATERIAL_PRESETS: MaterialPreset[] = [
@@ -48,6 +48,21 @@ const order = (
   note: opts.note,
   createdAt: new Date(date + 'T12:00:00Z').toISOString(),
 })
+
+/** Daily Meta Ads spend (public/data/meta-spend.json) as operating-expense items; ref = meta-spend-<date>. */
+export function metaSpendItems(): OpexItem[] {
+  return (metaSpend.days as { date: string; spend: number }[])
+    .filter((d) => d.spend > 0)
+    .map((d) => ({
+      id: 'ad-' + d.date,
+      date: d.date,
+      category: 'ads' as const,
+      amount: Math.round(d.spend * 100) / 100,
+      currency: (metaSpend.currency === 'GEL' ? 'GEL' : 'USD') as 'USD' | 'GEL',
+      description: 'Meta Ads',
+      ref: `meta-spend-${d.date}`,
+    }))
+}
 
 export function seedData(): AppData {
   n = 0
@@ -129,15 +144,7 @@ export function seedData(): AppData {
       { id: id('ps'), date: '2026-10-05', item: 'მუყაოს ყუთები', qty: 15, price: 8 },
       { id: id('ps'), date: '2026-10-18', item: 'მუყაოს ყუთები', qty: 5, price: 8 },
     ],
-    opex: META_ADS_SEED.map((x) => ({
-      id: id('ad'),
-      date: x.date,
-      category: 'ads' as const,
-      amount: x.amount,
-      currency: 'USD' as const,
-      description: 'Meta Ads',
-      ref: x.ref,
-    })),
+    opex: metaSpendItems(),
     storage: [
       { id: id('st'), client: 'მამუკას ავეჯი', description: 'ყუთები', monthlyFee: 500, active: true },
       { id: id('st'), client: 'ოკტოპუსი', description: '13 ცალი', monthlyFee: 400, active: true },

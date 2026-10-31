@@ -40,14 +40,14 @@ export function Analytics({ data, t, lang, month }: { data: AppData; t: (k: TKey
     return [...m.entries()].map(([name, r]) => ({ name, ...r })).sort((a, b) => b.cost - a.cost)
   }, [scoped])
 
-  const trend = reports.map((r) => ({ m: fmtMonth(r.month, lang), labor: r.labor, tax: r.tax, materials: r.materials, other: r.other }))
-  const streams = reports.map((r) => ({ m: fmtMonth(r.month, lang), profit: r.profit, storage: r.storage, boxSales: r.boxSales, ads: r.ads }))
+  const trend = reports.map((r) => ({ m: fmtMonth(r.month, lang), labor: r.labor, tax: r.tax, materials: r.materials, other: r.other, ads: r.ads }))
+  const streams = reports.map((r) => ({ m: fmtMonth(r.month, lang), profit: r.profit, storage: r.storage, boxSales: r.boxSales }))
 
   return (
     <>
       <Card title={t('report_title')}>
         <div className="table-wrap">
-          <div className="table-wrap"><table>
+          <table>
             <thead>
               <tr>
                 <th>{t('month')}</th>
@@ -98,7 +98,7 @@ export function Analytics({ data, t, lang, month }: { data: AppData; t: (k: TKey
                 </tr>
               )}
             </tbody>
-          </table></div>
+          </table>
         </div>
       </Card>
 
@@ -112,6 +112,7 @@ export function Analytics({ data, t, lang, month }: { data: AppData; t: (k: TKey
               { key: 'tax', label: t('cat_tax'), color: c.s2 },
               { key: 'materials', label: t('cat_materials'), color: c.s3 },
               { key: 'other', label: t('cat_other'), color: c.s4 },
+              { key: 'ads', label: t('cat_ads'), color: c.s5 },
             ]}
           />
         </Card>
@@ -123,7 +124,6 @@ export function Analytics({ data, t, lang, month }: { data: AppData; t: (k: TKey
               { key: 'profit', label: t('series_profit'), color: c.s1 },
               { key: 'storage', label: t('series_storage'), color: c.s2 },
               { key: 'boxSales', label: t('series_boxSales'), color: c.s3 },
-              { key: 'ads', label: t('series_ads'), color: c.s4 },
             ]}
           />
         </Card>
@@ -132,7 +132,7 @@ export function Analytics({ data, t, lang, month }: { data: AppData; t: (k: TKey
       <div className="grid two section">
         <Card title={t('clients_title')}>
           <div className="table-wrap">
-            <div className="table-wrap"><table>
+            <table>
               <thead>
                 <tr>
                   <th>{t('col_client')}</th>
@@ -154,7 +154,7 @@ export function Analytics({ data, t, lang, month }: { data: AppData; t: (k: TKey
                 ))}
                 {!clients.length && <tr><td colSpan={5} className="empty">{t('noData')}</td></tr>}
               </tbody>
-            </table></div>
+            </table>
           </div>
         </Card>
         <div className="grid" style={{ gap: 16 }}>
@@ -162,25 +162,27 @@ export function Analytics({ data, t, lang, month }: { data: AppData; t: (k: TKey
             {payees.length ? <HorizontalBars data={payees} valueKey="amount" labelKey="name" color={c.s2} /> : <div className="empty">{t('noData')}</div>}
           </Card>
           <Card title={t('materials_usage')}>
-            <div className="table-wrap"><table>
-              <thead>
-                <tr>
-                  <th>{t('col_item')}</th>
-                  <th className="num">{t('col_used')}</th>
-                  <th className="num">{t('col_cost')}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {materials.map((m) => (
-                  <tr key={m.name}>
-                    <td>{m.name}</td>
-                    <td className="num">{m.qty}</td>
-                    <td className="num">{m.cost.toFixed(2)}</td>
+            <div className="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>{t('col_item')}</th>
+                    <th className="num">{t('col_used')}</th>
+                    <th className="num">{t('col_cost')}</th>
                   </tr>
-                ))}
-                {!materials.length && <tr><td colSpan={3} className="empty">{t('noData')}</td></tr>}
-              </tbody>
-            </table></div>
+                </thead>
+                <tbody>
+                  {materials.map((m) => (
+                    <tr key={m.name}>
+                      <td>{m.name}</td>
+                      <td className="num">{m.qty}</td>
+                      <td className="num">{m.cost.toFixed(2)}</td>
+                    </tr>
+                  ))}
+                  {!materials.length && <tr><td colSpan={3} className="empty">{t('noData')}</td></tr>}
+                </tbody>
+              </table>
+            </div>
           </Card>
         </div>
       </div>
