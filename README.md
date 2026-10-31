@@ -41,7 +41,7 @@ Excel-ის ყველა არსებული ჩანაწერი (
 
 ## განთავსება (Vercel)
 
-პროდაქშენი: https://nextmove-finance.vercel.app (Vercel პროექტი `nextmove-finance`).
+პროდაქშენი: https://nextmove-ge.vercel.app (ასევე https://nextmove-finance.vercel.app; Vercel პროექტი `nextmove-finance`).
 
 ამჟამად პროექტი GitHub-თან დაკავშირებული არ არის (Vercel-ის GitHub ინტეგრაცია არ არის დაყენებული), ამიტომ build-ის install ბრძანება თავად იღებს კოდს ბრენჩიდან:
 
