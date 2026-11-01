@@ -381,6 +381,7 @@ input[type='date']::-webkit-date-and-time-value { text-align: left; }
 .cg-head h4 { font-size: 12px; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.05em; }
 .cg-head .sum { font-size: 13px; color: var(--text-2); font-variant-numeric: tabular-nums; font-weight: 600; }
 .cost-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; border-top: 1px solid var(--grid); min-height: 44px; }
+.cost-group > .cost-row:first-child, .cost-group > div:first-child > .cost-row { border-top: 0; }
 .cost-row .nm { flex: 1 1 0; min-width: 0; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cost-row input.nm { white-space: normal; }
 .cost-row .amt { width: 92px; flex: none; text-align: right; }
