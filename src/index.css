@@ -93,7 +93,7 @@ a { color: var(--accent); }
 button, input, select, textarea { font: inherit; color: inherit; }
 
 /* Layout */
-.app { display: grid; grid-template-columns: 232px 1fr; min-height: 100vh; }
+.app { display: grid; grid-template-columns: 264px 1fr; min-height: 100vh; }
 .sidebar {
   background: var(--surface); border-right: 1px solid var(--border); padding: 20px 14px; position: sticky; top: 0; height: 100vh;
   display: flex; flex-direction: column; gap: 6px;
@@ -104,7 +104,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .brand small { display: block; color: var(--muted); font-weight: 500; font-size: 12px; letter-spacing: 0; }
 .nav-btn {
   display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 9px 10px; border: 0; background: transparent;
-  border-radius: 8px; cursor: pointer; color: var(--text-2); font-weight: 500;
+  border-radius: 8px; cursor: pointer; color: var(--text-2); font-weight: 500; font-size: 14px; white-space: nowrap;
 }
 .nav-btn:hover { background: var(--surface-2); color: var(--text); }
 .nav-btn.active { background: var(--surface-2); color: var(--text); font-weight: 600; }
@@ -333,13 +333,13 @@ tr.total td { font-weight: 600; border-top: 2px solid var(--axis); }
   .burger { display: inline-flex; padding: 6px; color: var(--text); }
   .drawer-bg { display: block; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.4); z-index: 60; }
   .drawer {
-    position: absolute; top: 0; right: 0; bottom: 0; width: min(300px, 84vw); background: var(--surface); padding: 16px 12px calc(16px + env(safe-area-inset-bottom));
+    position: absolute; top: 0; right: 0; bottom: 0; width: min(330px, 90vw); background: var(--surface); padding: 16px 12px calc(16px + env(safe-area-inset-bottom));
     display: flex; flex-direction: column; gap: 4px; box-shadow: -8px 0 30px rgba(0, 0, 0, 0.25); overflow-y: auto;
   }
   .drawer-head { display: flex; justify-content: space-between; align-items: center; padding: 0 6px 14px; }
   .drawer-head .brand-logo { padding: 0; }
   .drawer-head .brand-logo img { width: 110px; }
-  .drawer .nav-btn { padding: 13px 12px; font-size: 16px; }
+  .drawer .nav-btn { padding: 13px 12px; font-size: 15px; white-space: nowrap; }
 }
 
 .order-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; cursor: pointer; }
