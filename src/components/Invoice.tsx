@@ -62,11 +62,13 @@ export function InvoiceDoc({ inv, data, t }: { inv: Invoice; data: AppData; t: T
       <div className="inv-bar" />
       <div className="inv-head">
         <img src="/invoice/logo.png" alt="Next Move" className="inv-logo" />
-        <div className="inv-date">
-          <div className="inv-rule" />
-          <div>
-            {t('inv_date')}: {fmtDate(inv.date)}
-            {inv.number && <span className="inv-num"> · № {inv.number}</span>}
+        <div className="inv-meta">
+          <div className="inv-title">
+            {t('invoice').toUpperCase()}
+            {inv.number && <span> № {inv.number}</span>}
+          </div>
+          <div className="inv-when">
+            {t('inv_date')}: <b>{fmtDate(inv.date)}</b>
           </div>
         </div>
       </div>

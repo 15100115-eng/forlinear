@@ -26,7 +26,7 @@
   --accent-ink: #ffffff;
   --radius: 12px;
   --shadow: 0 1px 2px rgba(11, 11, 11, 0.04), 0 4px 16px rgba(11, 11, 11, 0.04);
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans Georgian', 'BPG Arial', sans-serif;
+  font-family: 'Noto Sans Georgian', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   font-size: 15px;
   line-height: 1.45;
 }
@@ -415,15 +415,19 @@ input[type='date']::-webkit-date-and-time-value { text-align: left; }
 .inv-preview-wrap { background: #fff; color: #111; border: 1px solid var(--border); border-radius: 8px; padding: 24px 28px; overflow-x: auto; }
 .inv-bar { display: none; }
 .inv-preview-wrap { border-left: 7px solid #f4841f; }
-.inv-doc { font-family: 'Noto Sans Georgian', 'BPG Arial', system-ui, Arial, sans-serif; font-size: 12px; line-height: 1.6; color: #111; min-width: 560px; }
+.inv-doc { font-family: 'Noto Sans Georgian', system-ui, Arial, sans-serif; font-size: 12px; line-height: 1.6; color: #111; min-width: 560px; }
 .inv-doc h3 { font-size: 16px; font-weight: 700; margin: 0 0 6px; color: #111; }
 .inv-doc p { margin: 0; }
-.inv-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 36px; }
-.inv-logo { width: 90px; height: auto; }
-.inv-date { width: 60%; text-align: right; padding-top: 6px; }
-.inv-rule { border-top: 1px solid #333; margin-bottom: 6px; }
-.inv-num { color: #555; }
+.inv-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; padding-bottom: 12px; border-bottom: 1px solid #333; margin-bottom: 36px; }
+.inv-logo { width: 96px; height: auto; }
+.inv-meta { text-align: right; line-height: 1.5; }
+.inv-meta .inv-title { font-size: 20px; font-weight: 700; letter-spacing: 0.02em; }
+.inv-meta .inv-title span { color: #f4841f; }
+.inv-meta .inv-when { font-size: 12px; color: #333; margin-top: 2px; }
+.inv-meta .inv-when b { font-weight: 600; color: #111; }
 .inv-parties { display: flex; justify-content: space-between; gap: 24px; margin-bottom: 96px; }
+.inv-parties > div:first-child { flex: 0 0 56%; }
+.inv-parties > .inv-right { flex: 1 1 auto; }
 .inv-parties .inv-right { text-align: right; }
 .inv-table { width: 100%; border-collapse: collapse; margin-bottom: 96px; }
 .inv-table th { text-align: left; font-weight: 700; padding: 8px 0 20px; border: 0; text-transform: none; letter-spacing: 0; font-size: 12px; color: #111; }
