@@ -7,6 +7,8 @@ import { Modal, Money } from './ui'
 
 type T = (k: TKey) => string
 
+const SALE_OTHER = 'მიტანა / ტაქსი'
+
 const groupOf = (l: ExpenseLine): ExpenseGroup => {
   if (l.group) return l.group
   if (l.kind === 'material') return 'material'
@@ -24,7 +26,7 @@ const row = (group: ExpenseGroup, name = '', comment = ''): ExpenseLine => ({
 })
 const matRow = (name: string, unitPrice: number): ExpenseLine => ({ id: uid(), kind: 'material', group: 'material', name, qty: 0, unitPrice, amount: 0 })
 
-/** Pre-lists the usual rows (blank amounts) so the form is a checklist, keeping any existing lines. */
+/** Pre-lists the usual rows (blank amounts) so the form reads like a checklist; existing lines are kept. */
 function withTemplates(lines: ExpenseLine[], type: OrderType): ExpenseLine[] {
   const out: ExpenseLine[] = lines.map((l) => ({ ...l, group: groupOf(l) }))
   const has = (g: ExpenseGroup, name?: string) => out.some((l) => l.group === g && (name == null || l.name === name))
@@ -33,10 +35,17 @@ function withTemplates(lines: ExpenseLine[], type: OrderType): ExpenseLine[] {
     if (!has('helper')) out.push(row('helper', HELPER_PRESETS[0]))
     for (const n of OTHER_PRESETS) if (!has('other', n)) out.push(row('other', n))
     for (const m of MATERIAL_PRESETS) if (!has('material', m.name)) out.push(matRow(m.name, m.unitPrice))
-  } else {
-    if (!has('other', 'მიტანა / ტაქსი')) out.push(row('other', 'მიტანა / ტაქსი'))
-  }
+  } else if (!has('other', SALE_OTHER)) out.push(row('other', SALE_OTHER))
   return out
+}
+
+/** Preset rows show their name as plain text; only custom rows get a name input and a delete button. */
+const isPresetRow = (l: ExpenseLine) => {
+  const g = l.group ?? groupOf(l)
+  if (g === 'helper') return HELPER_PRESETS.includes(l.name)
+  if (g === 'other') return OTHER_PRESETS.includes(l.name) || l.name === SALE_OTHER
+  if (g === 'material') return MATERIAL_PRESETS.some((m) => m.name === l.name)
+  return false
 }
 
 function blankOrder(type: OrderType): Order {
@@ -76,6 +85,7 @@ export function OrderForm({
     return { ...base, expenses: withTemplates(base.expenses, base.type ?? 'moving') }
   })
   const [touched, setTouched] = useState(false)
+  const [openComments, setOpenComments] = useState<Set<string>>(() => new Set(initial?.expenses.filter((l) => l.comment).map((l) => l.id)))
   const type: OrderType = o.type ?? 'moving'
   const isSale = type === 'sale'
   const totals = useMemo(() => orderTotals(o, settings), [o, settings])
@@ -94,6 +104,13 @@ export function OrderForm({
     }))
   const addRow = (g: ExpenseGroup) => setO((p) => ({ ...p, expenses: [...p.expenses, g === 'material' ? matRow('', 0) : row(g)] }))
   const removeLine = (id: string) => setO((p) => ({ ...p, expenses: p.expenses.filter((l) => l.id !== id) }))
+  const toggleComment = (id: string) =>
+    setOpenComments((s) => {
+      const n = new Set(s)
+      if (n.has(id)) n.delete(id)
+      else n.add(id)
+      return n
+    })
 
   const setItem = (id: string, patch: Partial<SaleLine>) => setO((p) => ({ ...p, items: (p.items ?? []).map((l) => (l.id === id ? { ...l, ...patch } : l)) }))
   const addItem = (name = '', price = 0, unitCost = 0) => setO((p) => ({ ...p, items: [...(p.items ?? []), { id: uid(), name, qty: 1, price, unitCost }] }))
@@ -119,59 +136,91 @@ export function OrderForm({
     })
   }
 
-  const CostRow = ({ l, list }: { l: ExpenseLine; list?: string[] }) => (
-    <div className="cost-row">
-      <input type="text" placeholder={t('f_who')} value={l.name} onChange={(e) => setLine(l.id, { name: e.target.value })} list={list ? `list-${l.group}` : undefined} />
-      <input type="number" placeholder="₾" min={0} step="0.01" value={l.amount || ''} onChange={(e) => setLine(l.id, { amount: Number(e.target.value) })} onFocus={(e) => e.target.select()} />
-      <input type="text" placeholder={t('col_comment')} value={l.comment ?? ''} onChange={(e) => setLine(l.id, { comment: e.target.value })} />
-      <button className="icon-btn danger" onClick={() => removeLine(l.id)} aria-label={t('delete')}>✕</button>
-    </div>
-  )
+  // Plain render helpers (not components) so inputs keep focus between keystrokes.
+  const costRow = (l: ExpenseLine, list?: string) => {
+    const preset = isPresetRow(l)
+    const showCm = openComments.has(l.id)
+    return (
+      <div key={l.id}>
+        <div className="cost-row">
+          {preset ? (
+            <span className="nm">{l.name}</span>
+          ) : (
+            <input type="text" className="nm" placeholder={t('f_who')} value={l.name} onChange={(e) => setLine(l.id, { name: e.target.value })} list={list} />
+          )}
+          <input type="number" className="amt" placeholder="₾" min={0} step="0.01" inputMode="decimal" value={l.amount || ''} onChange={(e) => setLine(l.id, { amount: Number(e.target.value) })} onFocus={(e) => e.target.select()} />
+          <input type="text" className="cm" placeholder={t('col_comment')} value={l.comment ?? ''} onChange={(e) => setLine(l.id, { comment: e.target.value })} />
+          <button type="button" className={`icon-btn cm-toggle ${showCm || l.comment ? 'on' : ''}`} onClick={() => toggleComment(l.id)} aria-label={t('col_comment')} title={t('col_comment')}>
+            💬
+          </button>
+          {!preset && (
+            <button type="button" className="icon-btn danger" onClick={() => removeLine(l.id)} aria-label={t('delete')}>✕</button>
+          )}
+        </div>
+        {showCm && (
+          <div className="cost-cm">
+            <input type="text" placeholder={t('col_comment')} value={l.comment ?? ''} onChange={(e) => setLine(l.id, { comment: e.target.value })} autoFocus />
+          </div>
+        )}
+      </div>
+    )
+  }
 
-  const Group = ({ g, title, addLabel, list, children }: { g: ExpenseGroup; title: string; addLabel: string; list?: string[]; children?: React.ReactNode }) => (
+  const matRowEl = (l: ExpenseLine) => {
+    const preset = isPresetRow(l)
+    const amt = lineAmount(l)
+    return (
+      <div className="cost-row" key={l.id}>
+        {preset ? (
+          <span className="nm">{l.name}</span>
+        ) : (
+          <input type="text" className="nm" placeholder={t('col_item')} value={l.name} onChange={(e) => setLine(l.id, { name: e.target.value })} />
+        )}
+        <input type="number" className="qty" placeholder="0" min={0} step="1" inputMode="decimal" value={l.qty || ''} onChange={(e) => setLine(l.id, { qty: Number(e.target.value) })} onFocus={(e) => e.target.select()} />
+        <span className="x">×</span>
+        <input type="number" className="price" min={0} step="0.01" inputMode="decimal" value={l.unitPrice ?? ''} onChange={(e) => setLine(l.id, { unitPrice: Number(e.target.value) })} onFocus={(e) => e.target.select()} title={t('col_price')} />
+        <span className={`tot ${amt ? '' : 'zero'}`}>{amt ? `${amt.toFixed(2)} ₾` : '—'}</span>
+        {!preset && (
+          <button type="button" className="icon-btn danger" onClick={() => removeLine(l.id)} aria-label={t('delete')}>✕</button>
+        )}
+      </div>
+    )
+  }
+
+  const group = (g: ExpenseGroup, title: string, addLabel: string, body: React.ReactNode) => (
     <div className="cost-group">
       <div className="cg-head">
         <h4>{title}</h4>
         <span className="sum">{gsum(g) ? `${gsum(g).toFixed(2)} ₾` : ''}</span>
       </div>
-      {list && (
-        <datalist id={`list-${g}`}>
-          {list.map((p) => (
-            <option key={p} value={p} />
-          ))}
-        </datalist>
-      )}
-      {children}
-      <button type="button" className="btn ghost" onClick={() => addRow(g)}>{addLabel}</button>
+      {body}
+      <button type="button" className="cg-add" onClick={() => addRow(g)}>{addLabel}</button>
     </div>
   )
 
   return (
     <Modal title={initial ? t('editOrder') : t('newOrder')} onClose={onClose}>
       <div className="form-grid">
-        <div className="full">
-          <h3 style={{ marginBottom: 8 }}>{t('f_type')}</h3>
-          <div className="type-pick">
-            <button type="button" className={`type-btn ${!isSale ? 'active' : ''}`} onClick={() => switchType('moving')}>
-              <span className="ico">🚚</span>
-              <span>
-                <b>{t('type_moving')}</b>
-                <small>{t('type_moving_sub')}</small>
-              </span>
-            </button>
-            <button type="button" className={`type-btn ${isSale ? 'active' : ''}`} onClick={() => switchType('sale')}>
-              <span className="ico">📦</span>
-              <span>
-                <b>{t('type_sale')}</b>
-                <small>{t('type_sale_sub')}</small>
-              </span>
-            </button>
-          </div>
+        <div className="full type-pick">
+          <button type="button" className={`type-btn ${!isSale ? 'active' : ''}`} onClick={() => switchType('moving')}>
+            <span className="ico">🚚</span>
+            <span>
+              <b>{t('type_moving')}</b>
+              <small>{t('type_moving_sub')}</small>
+            </span>
+          </button>
+          <button type="button" className={`type-btn ${isSale ? 'active' : ''}`} onClick={() => switchType('sale')}>
+            <span className="ico">📦</span>
+            <span>
+              <b>{t('type_sale')}</b>
+              <small>{t('type_sale_sub')}</small>
+            </span>
+          </button>
         </div>
 
-        <label className="field">
+        <label className="field full">
           {isSale ? t('f_client_sale') : `${t('f_client')} *`}
-          <input type="text" list="clients-list" value={o.client} onChange={(e) => set({ client: e.target.value })} autoFocus={!isSale} />
+          <input type="text" list="clients-list" value={o.client} onChange={(e) => set({ client: e.target.value })} />
           <datalist id="clients-list">
             {clients.map((c) => (
               <option key={c} value={c} />
@@ -188,16 +237,16 @@ export function OrderForm({
           <>
             <label className="field">
               {t('f_revenue')} *
-              <input type="number" min={0} step="0.01" value={o.revenue || ''} placeholder="0" onChange={(e) => set({ revenue: Number(e.target.value) })} onFocus={(e) => e.target.select()} />
+              <input type="number" min={0} step="0.01" inputMode="decimal" value={o.revenue || ''} placeholder="0" onChange={(e) => set({ revenue: Number(e.target.value) })} onFocus={(e) => e.target.select()} />
             </label>
-            <label className="field">
+            <label className="field full">
               {t('f_description')}
               <input type="text" value={o.description} onChange={(e) => set({ description: e.target.value })} />
             </label>
             <label className="check">
               <input type="checkbox" checked={o.vatIncluded} onChange={(e) => set({ vatIncluded: e.target.checked })} /> {t('f_vat')}
             </label>
-            <div>
+            <div className="check-wrap">
               <label className="check">
                 <input type="checkbox" checked={o.applyPayoutTax} onChange={(e) => set({ applyPayoutTax: e.target.checked })} /> {t('f_tax')}
               </label>
@@ -205,57 +254,34 @@ export function OrderForm({
             </div>
 
             <div className="full">
-              <h3>{t('f_costs')}</h3>
-              <div className="hint" style={{ margin: '2px 0 0' }}>{t('f_costs_hint')}</div>
-
-              <Group g="transport" title={t('grp_transport')} addLabel={t('add_vehicle')} list={TRANSPORT_PRESETS}>
-                {grp('transport').map((l) => (
-                  <CostRow key={l.id} l={l} list={TRANSPORT_PRESETS} />
+              <h3>{t('f_costs')} <span className="muted" style={{ fontWeight: 400 }}>· {t('f_costs_hint')}</span></h3>
+              <datalist id="list-transport">
+                {TRANSPORT_PRESETS.map((p) => (
+                  <option key={p} value={p} />
                 ))}
-              </Group>
-
-              <Group g="helper" title={t('grp_helpers')} addLabel={t('add_helper')} list={HELPER_PRESETS}>
-                {grp('helper').map((l) => (
-                  <CostRow key={l.id} l={l} list={HELPER_PRESETS} />
-                ))}
-              </Group>
-
-              <Group g="other" title={t('grp_other')} addLabel={t('add_other')}>
-                {grp('other').map((l) => (
-                  <CostRow key={l.id} l={l} />
-                ))}
-              </Group>
-
-              <Group g="material" title={t('grp_materials')} addLabel={t('add_material')}>
-                {grp('material').map((l) => (
-                  <div className="cost-row mat" key={l.id}>
-                    <input type="text" className="nm" placeholder={t('col_item')} value={l.name} onChange={(e) => setLine(l.id, { name: e.target.value })} />
-                    <input type="number" placeholder={t('qty_short')} min={0} step="0.01" value={l.qty || ''} onChange={(e) => setLine(l.id, { qty: Number(e.target.value) })} onFocus={(e) => e.target.select()} />
-                    <span className="x">
-                      × <input type="number" min={0} step="0.01" value={l.unitPrice ?? ''} onChange={(e) => setLine(l.id, { unitPrice: Number(e.target.value) })} onFocus={(e) => e.target.select()} style={{ width: 70, display: 'inline-block', padding: '6px 8px' }} /> ₾
-                    </span>
-                    <div className="tot">{lineAmount(l) ? `${lineAmount(l).toFixed(2)} ₾` : <span className="muted">—</span>}</div>
-                    <button className="icon-btn danger" onClick={() => removeLine(l.id)} aria-label={t('delete')}>✕</button>
-                  </div>
-                ))}
-              </Group>
+              </datalist>
+              {group('transport', t('grp_transport'), t('add_vehicle'), grp('transport').map((l) => costRow(l, 'list-transport')))}
+              {group('helper', t('grp_helpers'), t('add_helper'), grp('helper').map((l) => costRow(l)))}
+              {group('other', t('grp_other'), t('add_other'), grp('other').map((l) => costRow(l)))}
+              {group('material', t('grp_materials'), t('add_material'), grp('material').map(matRowEl))}
             </div>
           </>
         )}
 
         {isSale && (
           <>
+            <div className="field" />
             <div className="full">
               <h3>{t('f_items')} *</h3>
               <div className="lines">
                 {items.map((l) => (
                   <div className="line sale" key={l.id}>
-                    <label className="field">{t('col_item')}<input type="text" value={l.name} onChange={(e) => setItem(l.id, { name: e.target.value })} list="sale-list" autoFocus={!l.name} /></label>
-                    <label className="field">{t('col_qty')}<input type="number" min={0} step="1" value={l.qty} onChange={(e) => setItem(l.id, { qty: Number(e.target.value) })} onFocus={(e) => e.target.select()} /></label>
-                    <label className="field">{t('f_salePrice')}<input type="number" min={0} step="0.01" value={l.price} onChange={(e) => setItem(l.id, { price: Number(e.target.value) })} onFocus={(e) => e.target.select()} /></label>
-                    <label className="field">{t('f_unitCost')}<input type="number" min={0} step="0.01" value={l.unitCost} onChange={(e) => setItem(l.id, { unitCost: Number(e.target.value) })} onFocus={(e) => e.target.select()} /></label>
+                    <label className="field">{t('col_item')}<input type="text" value={l.name} onChange={(e) => setItem(l.id, { name: e.target.value })} list="sale-list" /></label>
+                    <label className="field">{t('col_qty')}<input type="number" min={0} step="1" inputMode="decimal" value={l.qty} onChange={(e) => setItem(l.id, { qty: Number(e.target.value) })} onFocus={(e) => e.target.select()} /></label>
+                    <label className="field">{t('f_salePrice')}<input type="number" min={0} step="0.01" inputMode="decimal" value={l.price} onChange={(e) => setItem(l.id, { price: Number(e.target.value) })} onFocus={(e) => e.target.select()} /></label>
+                    <label className="field">{t('f_unitCost')}<input type="number" min={0} step="0.01" inputMode="decimal" value={l.unitCost} onChange={(e) => setItem(l.id, { unitCost: Number(e.target.value) })} onFocus={(e) => e.target.select()} /></label>
                     <div className="amount">{round2(l.qty * l.price).toFixed(2)} ₾</div>
-                    <button className="icon-btn danger" onClick={() => removeItem(l.id)} aria-label={t('delete')}>✕</button>
+                    <button type="button" className="icon-btn danger" onClick={() => removeItem(l.id)} aria-label={t('delete')}>✕</button>
                   </div>
                 ))}
               </div>
@@ -265,24 +291,17 @@ export function OrderForm({
                 ))}
               </datalist>
               <div className="chips">
-                <span>{t('quickAdd')}</span>
                 {SALE_PRESETS.map((p) => (
                   <button type="button" className="chip" key={p.name} onClick={() => addItem(p.name, p.price, p.unitCost)}>
-                    {p.name}{p.price ? ` · ${p.price} ₾` : ''}
+                    + {p.name}
                   </button>
                 ))}
-                <button type="button" className="btn sm" onClick={() => addItem()}>{t('addLine')}</button>
+                <button type="button" className="chip" onClick={() => addItem()}>{t('addLine')}</button>
               </div>
               {touched && !items.some((i) => i.name.trim() && i.qty > 0) && <span className="err">{t('required')}</span>}
             </div>
 
-            <div className="full">
-              <Group g="other" title={t('f_saleExpenses')} addLabel={t('add_other')}>
-                {grp('other').map((l) => (
-                  <CostRow key={l.id} l={l} />
-                ))}
-              </Group>
-            </div>
+            <div className="full">{group('other', t('f_saleExpenses'), t('add_other'), grp('other').map((l) => costRow(l)))}</div>
             <label className="field full">
               {t('f_description')}
               <input type="text" value={o.description} onChange={(e) => set({ description: e.target.value })} />
@@ -293,7 +312,7 @@ export function OrderForm({
         {!isSale && (
           <label className="field full">
             {t('f_note')}
-            <textarea rows={2} value={o.note ?? ''} onChange={(e) => set({ note: e.target.value })} />
+            <input type="text" value={o.note ?? ''} onChange={(e) => set({ note: e.target.value })} />
           </label>
         )}
 
@@ -306,14 +325,11 @@ export function OrderForm({
             </>
           ) : (
             <>
-              <div className="r"><span>{t('s_transport')}</span><span>{gsum('transport').toFixed(2)} ₾</span></div>
-              <div className="r"><span>{t('s_helpers')}</span><span>{gsum('helper').toFixed(2)} ₾</span></div>
-              <div className="r"><span>{t('s_other')}</span><span>{gsum('other').toFixed(2)} ₾</span></div>
-              {o.applyPayoutTax && <div className="r"><span>{t('s_tax')} ({settings.payoutTaxRate}%)</span><span>{totals.tax.toFixed(2)} ₾</span></div>}
-              <div className="r"><span>{t('s_materials')}</span><span>{totals.materials.toFixed(2)} ₾</span></div>
-              <div className="r"><span><b>{t('s_totalExpense')}</b></span><span><b>{totals.totalExpense.toFixed(2)} ₾</b></span></div>
-              {o.vatIncluded && <div className="r muted"><span>{t('s_vat')} ({settings.vatRate}%)</span><span>−{totals.vat.toFixed(2)} ₾</span></div>}
               <div className="r"><span>{t('s_netRevenue')}</span><span>{totals.netRevenue.toFixed(2)} ₾</span></div>
+              {o.vatIncluded && <div className="r muted"><span>{t('s_vat')} ({settings.vatRate}%)</span><span>−{totals.vat.toFixed(2)} ₾</span></div>}
+              <div className="r"><span>{t('s_transport')} + {t('s_helpers')} + {t('s_other')}</span><span>−{totals.payouts.toFixed(2)} ₾</span></div>
+              {o.applyPayoutTax && <div className="r"><span>{t('s_tax')} ({settings.payoutTaxRate}%)</span><span>−{totals.tax.toFixed(2)} ₾</span></div>}
+              <div className="r"><span>{t('s_materials')}</span><span>−{totals.materials.toFixed(2)} ₾</span></div>
             </>
           )}
           <div className="r total"><span>{t('s_profit')}</span><Money v={totals.profit} digits={2} /></div>

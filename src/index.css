@@ -347,30 +347,63 @@ tr.total td { font-weight: 600; border-top: 2px solid var(--axis); }
   .line.sale > *:nth-child(6) { grid-area: del; justify-self: end; }
 }
 
-/* Grouped expense form */
-.cost-group { border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px 10px; margin-top: 10px; }
-.cost-group .cg-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 6px; }
-.cost-group .cg-head h4 { font-size: 13px; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.04em; }
-.cost-group .cg-head .sum { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
-.cost-row { display: grid; grid-template-columns: 1fr 120px 1fr 28px; gap: 8px; align-items: center; padding: 4px 0; }
-.cost-row.mat { grid-template-columns: 1fr 90px 110px 90px 28px; }
-.cost-row .nm { font-size: 14px; }
-.cost-row .x { color: var(--muted); font-size: 13px; white-space: nowrap; }
-.cost-row .tot { text-align: right; font-variant-numeric: tabular-nums; font-size: 14px; }
-.cost-row input[type='number'] { text-align: right; }
-.cost-row .icon-btn { padding: 4px; }
-.cost-group .btn.ghost { margin-top: 4px; padding: 4px 8px; font-size: 13px; color: var(--accent); }
+/* ---------- Order form: compact cost rows ---------- */
+input[type='date'] { -webkit-appearance: none; appearance: none; min-width: 0; display: block; min-height: 40px; }
+input[type='date']::-webkit-date-and-time-value { text-align: left; }
+.form-grid > .full { grid-column: 1 / -1; }
+.cost-group { border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px 6px; margin-top: 10px; }
+.cg-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding-bottom: 4px; }
+.cg-head h4 { font-size: 12px; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.05em; }
+.cg-head .sum { font-size: 13px; color: var(--text-2); font-variant-numeric: tabular-nums; font-weight: 600; }
+.cost-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; border-top: 1px solid var(--grid); min-height: 44px; }
+.cost-row .nm { flex: 1 1 0; min-width: 0; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cost-row input.nm { white-space: normal; }
+.cost-row .amt { width: 92px; flex: none; text-align: right; }
+.cost-row .cm { flex: 1 1 40%; min-width: 0; }
+.cost-row .qty { width: 62px; flex: none; text-align: right; }
+.cost-row .price { width: 64px; flex: none; text-align: right; padding: 7px 6px; font-size: 13px; color: var(--text-2); }
+.cost-row .x { color: var(--muted); font-size: 13px; flex: none; }
+.cost-row .tot { width: 70px; flex: none; text-align: right; font-variant-numeric: tabular-nums; font-size: 14px; }
+.cost-row .tot.zero { color: var(--muted); }
+.cost-row .icon-btn { flex: none; padding: 4px 6px; }
+.cost-row .cm-toggle { display: none; }
+.cost-cm { padding: 0 0 8px; }
+.cost-cm input { font-size: 14px; padding: 7px 10px; }
+.cg-add { border: 0; background: transparent; color: var(--accent); cursor: pointer; padding: 6px 0 4px; font-size: 13px; font-weight: 500; }
+.type-pick { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.type-btn { border: 2px solid var(--border); background: var(--surface); border-radius: 12px; padding: 12px 14px; text-align: left; cursor: pointer; display: flex; gap: 10px; align-items: center; }
+.type-btn .ico { font-size: 24px; }
+.type-btn b { display: block; font-size: 15px; }
+.type-btn small { color: var(--muted); }
+.type-btn.active { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--surface)); }
+.hint { font-size: 12px; color: var(--muted); margin: 2px 0 0 24px; line-height: 1.35; }
+.line.sale { grid-template-columns: 1fr 90px 120px 130px 100px 32px; align-items: end; }
+.line.sale .amount, .line.sale .icon-btn { margin-bottom: 8px; }
+.line.sale .field { font-size: 12px; }
 @media (max-width: 900px) {
-  .cost-row { grid-template-columns: 1fr 1fr 28px; grid-template-areas: 'nm nm del' 'amt cm del2'; row-gap: 6px; }
-  .cost-row > :nth-child(1) { grid-area: nm; }
-  .cost-row > :nth-child(2) { grid-area: amt; }
-  .cost-row > :nth-child(3) { grid-area: cm; }
-  .cost-row > :nth-child(4) { grid-area: del; justify-self: end; }
-  .cost-row.mat { grid-template-columns: 1fr 90px 28px; grid-template-areas: 'nm nm del' 'x qty tot'; }
-  .cost-row.mat > :nth-child(1) { grid-area: nm; }
-  .cost-row.mat > :nth-child(2) { grid-area: qty; }
-  .cost-row.mat > :nth-child(3) { grid-area: x; }
-  .cost-row.mat > :nth-child(4) { grid-area: tot; }
-  .cost-row.mat > :nth-child(5) { grid-area: del; justify-self: end; }
-  .cost-row + .cost-row { border-top: 1px solid var(--grid); padding-top: 8px; }
+  .form-grid { grid-template-columns: 1fr 1fr; gap: 10px 10px; }
+  .form-grid > label.check, .form-grid > .check-wrap { grid-column: 1 / -1; }
+  .form-grid label.field { font-size: 12px; gap: 4px; }
+  .type-btn small { display: none; }
+  .type-btn { padding: 10px 12px; }
+  .type-btn .ico { font-size: 22px; }
+  .modal { padding-left: 12px; padding-right: 12px; }
+  .cost-group { padding: 6px 10px 4px; margin-top: 8px; }
+  .cost-row { gap: 6px; }
+  .cost-row input, .cost-cm input { font-size: 16px; padding: 7px 8px; }
+  .cost-row .amt { width: 84px; }
+  .cost-row .cm { display: none; }
+  .cost-row .cm-toggle { display: inline-flex; }
+  .cost-row .qty { width: 58px; }
+  .cost-row .price { width: 58px; padding: 7px 4px; font-size: 14px; }
+  .cost-row .tot { width: 62px; font-size: 13px; }
+  .line.sale { grid-template-columns: 1fr 1fr; grid-template-areas: 'name name' 'qty price' 'cost amount' 'del del'; }
+  .line.sale > *:nth-child(1) { grid-area: name; }
+  .line.sale > *:nth-child(2) { grid-area: qty; }
+  .line.sale > *:nth-child(3) { grid-area: price; }
+  .line.sale > *:nth-child(4) { grid-area: cost; }
+  .line.sale > *:nth-child(5) { grid-area: amount; align-self: center; text-align: left; font-weight: 600; margin: 0; }
+  .line.sale > *:nth-child(6) { grid-area: del; justify-self: end; margin: 0; }
+  .summary-box .r { font-size: 13.5px; padding: 2px 0; }
+  .summary-box .r.total { font-size: 15px; }
 }
