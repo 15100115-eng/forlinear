@@ -309,6 +309,7 @@ tr.total td { font-weight: 600; border-top: 2px solid var(--axis); }
     width: 56px; height: 56px; border-radius: 50%; border: 0; background: var(--accent); color: #fff; font-size: 30px; line-height: 1;
     align-items: center; justify-content: center; box-shadow: 0 6px 20px rgba(42, 120, 214, 0.45); cursor: pointer;
   }
+  .fab-secondary { display: flex; bottom: calc(140px + env(safe-area-inset-bottom)); width: 48px; height: 48px; right: 20px; font-size: 22px; background: var(--surface); color: var(--text); border: 1px solid var(--border); box-shadow: var(--shadow), 0 4px 14px rgba(0,0,0,0.12); }
   .sheet-bg { display: block; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.35); z-index: 41; }
   .sheet {
     position: absolute; left: 0; right: 0; bottom: 0; background: var(--surface); border-radius: 16px 16px 0 0; padding: 12px 10px calc(72px + env(safe-area-inset-bottom));

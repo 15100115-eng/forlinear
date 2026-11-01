@@ -62,8 +62,9 @@ export default function App() {
     { id: 'settings', label: t('nav_settings'), icon: Icons.settings },
   ]
   const showMonth = page === 'dashboard' || page === 'orders' || page === 'analytics'
-  const primaryNav = nav.slice(0, 4)
-  const moreNav = nav.slice(4)
+  const primaryIds: Page[] = ['dashboard', 'orders', 'analytics', 'invoices']
+  const primaryNav = primaryIds.map((id) => nav.find((n) => n.id === id)!)
+  const moreNav = nav.filter((n) => !primaryIds.includes(n.id))
   const go = (p: Page) => {
     setPage(p)
     setMore(false)
@@ -83,6 +84,9 @@ export default function App() {
           </button>
         ))}
         <div className="spacer" />
+        <button className="btn" onClick={() => setInvoice(blankInvoice(data))} style={{ marginBottom: 8 }}>
+          🧾 {t('newInvoice')}
+        </button>
         <button className="btn primary" onClick={() => setForm({ open: true })}>
           {t('addOrder')}
         </button>
@@ -101,6 +105,9 @@ export default function App() {
                 ))}
               </select>
             )}
+            <button className="btn topbar-add" onClick={() => setInvoice(blankInvoice(data))}>
+              🧾 {t('invoice')}
+            </button>
             <button className="btn primary topbar-add" onClick={() => setForm({ open: true })}>
               {t('addOrder')}
             </button>
@@ -140,6 +147,7 @@ export default function App() {
           </div>
         </div>
       )}
+      <button className="fab fab-secondary" onClick={() => setInvoice(blankInvoice(data))} aria-label={t('newInvoice')}>🧾</button>
       <button className="fab" onClick={() => setForm({ open: true })} aria-label={t('addOrder')}>+</button>
 
       {invoice && (
