@@ -62,9 +62,6 @@ export default function App() {
     { id: 'settings', label: t('nav_settings'), icon: Icons.settings },
   ]
   const showMonth = page === 'dashboard' || page === 'orders' || page === 'analytics'
-  const primaryIds: Page[] = ['dashboard', 'orders', 'analytics', 'invoices']
-  const primaryNav = primaryIds.map((id) => nav.find((n) => n.id === id)!)
-  const moreNav = nav.filter((n) => !primaryIds.includes(n.id))
   const go = (p: Page) => {
     setPage(p)
     setMore(false)
@@ -95,6 +92,9 @@ export default function App() {
         <div className="topbar">
           <h1>{nav.find((n) => n.id === page)?.label}</h1>
           <div className="right">
+            <button className="icon-btn burger" onClick={() => setMore(true)} aria-label={t('more')}>
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+            </button>
             {showMonth && (
               <select className="inline-select" value={month} onChange={(e) => setMonth(e.target.value)} aria-label={t('month')}>
                 <option value="all">{t('allMonths')}</option>
@@ -125,21 +125,34 @@ export default function App() {
       </main>
 
       <nav className="bottom-nav" aria-label="navigation">
-        {primaryNav.map((n) => (
-          <button key={n.id} className={`tab ${page === n.id ? 'active' : ''}`} onClick={() => go(n.id)}>
-            {n.icon}
-            <span>{n.label}</span>
-          </button>
-        ))}
-        <button className={`tab ${moreNav.some((n) => n.id === page) || more ? 'active' : ''}`} onClick={() => setMore((m) => !m)}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="5" cy="12" r="1.5" /><circle cx="12" cy="12" r="1.5" /><circle cx="19" cy="12" r="1.5" /></svg>
-          <span>{t('more')}</span>
+        <button className={`tab ${page === 'dashboard' ? 'active' : ''}`} onClick={() => go('dashboard')}>
+          {Icons.dashboard}
+          <span>{t('nav_dashboard')}</span>
+        </button>
+        <button className="tab" onClick={() => setForm({ open: true })}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="9" /><path d="M12 8v8M8 12h8" /></svg>
+          <span>{t('tab_addOrder')}</span>
+        </button>
+        <button className="tab" onClick={() => setInvoice(blankInvoice(data))}>
+          {Icons.invoice}
+          <span>{t('tab_invoice')}</span>
+        </button>
+        <button className={`tab ${page === 'settings' ? 'active' : ''}`} onClick={() => go('settings')}>
+          {Icons.settings}
+          <span>{t('nav_settings')}</span>
         </button>
       </nav>
       {more && (
-        <div className="sheet-bg" onClick={() => setMore(false)}>
-          <div className="sheet" onClick={(e) => e.stopPropagation()}>
-            {moreNav.map((n) => (
+        <div className="drawer-bg" onClick={() => setMore(false)}>
+          <div className="drawer" onClick={(e) => e.stopPropagation()}>
+            <div className="drawer-head">
+              <div className="brand" style={{ padding: 0 }}>
+                NEXT MOVE
+                <small>{lang === 'ka' ? 'ფინანსური დაფა' : 'Finance dashboard'}</small>
+              </div>
+              <button className="icon-btn" onClick={() => setMore(false)} aria-label="close">✕</button>
+            </div>
+            {nav.map((n) => (
               <button key={n.id} className={`nav-btn ${page === n.id ? 'active' : ''}`} onClick={() => go(n.id)}>
                 {n.icon} {n.label}
               </button>
@@ -147,8 +160,6 @@ export default function App() {
           </div>
         </div>
       )}
-      <button className="fab fab-secondary" onClick={() => setInvoice(blankInvoice(data))} aria-label={t('newInvoice')}>🧾</button>
-      <button className="fab" onClick={() => setForm({ open: true })} aria-label={t('addOrder')}>+</button>
 
       {invoice && (
         <InvoiceForm
