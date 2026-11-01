@@ -4,10 +4,14 @@ import { uid } from '../calc'
 import type { TKey } from '../i18n'
 import { Card, Icons } from './ui'
 import { exportJson, exportXlsx, importJson } from '../export'
+import { fetchUsdRate } from '../App'
+import { fmtDate } from '../calc'
+import { useState } from 'react'
 import { resetToSeed } from '../store'
 
 export function SettingsPage({ data, t, update, setData }: { data: AppData; t: (k: TKey) => string; update: (fn: (d: AppData) => AppData) => void; setData: (d: AppData) => void }) {
   const file = useRef<HTMLInputElement>(null)
+  const [rateMsg, setRateMsg] = useState('')
   const s = data.settings
   const set = (p: Partial<Settings>) => update((d) => ({ ...d, settings: { ...d.settings, ...p } }))
   const co = data.company!
@@ -26,7 +30,25 @@ export function SettingsPage({ data, t, update, setData }: { data: AppData; t: (
         <div className="settings-grid">
           <label className="field">{t('set_tax')}<input type="number" min={0} max={100} value={s.payoutTaxRate} onChange={(e) => set({ payoutTaxRate: Number(e.target.value) })} /></label>
           <label className="field">{t('set_vat')}<input type="number" min={0} max={100} value={s.vatRate} onChange={(e) => set({ vatRate: Number(e.target.value) })} /></label>
-          <label className="field">{t('set_usdRate')}<input type="number" min={0} step="0.01" value={s.usdRate} onChange={(e) => set({ usdRate: Number(e.target.value) })} /></label>
+          <div className="field">
+            {t('set_usdRate')}
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <input type="number" min={0} step="0.0001" value={s.usdRate} onChange={(e) => set({ usdRate: Number(e.target.value) })} />
+              <button
+                className="btn sm"
+                onClick={async () => {
+                  setRateMsg('...')
+                  const ok = await fetchUsdRate(update)
+                  setRateMsg(ok ? t('usd_updated') : t('usd_failed'))
+                }}
+              >
+                {t('usd_refresh')}
+              </button>
+            </div>
+            <span className="hint" style={{ margin: 0 }}>
+              {t('usd_auto')}{s.usdRateDate ? ` / ${fmtDate(s.usdRateDate)}` : ''}{rateMsg ? ` / ${rateMsg}` : ''}
+            </span>
+          </div>
           <label className="field">{t('set_share')}<input type="number" min={0} max={100} value={s.profitSharePct} onChange={(e) => set({ profitSharePct: Number(e.target.value) })} /></label>
           <label className="field">{t('set_lang')}
             <select value={s.lang} onChange={(e) => set({ lang: e.target.value as Settings['lang'] })}>

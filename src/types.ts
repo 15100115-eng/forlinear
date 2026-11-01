@@ -122,8 +122,10 @@ export interface Invoice {
   items: InvoiceItem[]
   bankId: string
   signed: boolean
-  /** Prices on the invoice include VAT. */
+  /** Legacy flag; see vatMode. */
   vatIncluded?: boolean
+  /** How VAT is stated on the invoice: prices exclude it, include it, or no statement at all. */
+  vatMode?: 'excluded' | 'included' | 'none'
   orderId?: string
   createdAt: string
 }
@@ -131,8 +133,10 @@ export interface Invoice {
 export interface Settings {
   /** Bank pre-selected on new invoices. */
   defaultBankId?: string
-  /** GEL per 1 USD, used to convert USD expenses. */
+  /** GEL per 1 USD, used to convert USD expenses. Refreshed from the National Bank of Georgia on load. */
   usdRate: number
+  /** Date of the NBG rate currently stored (YYYY-MM-DD). */
+  usdRateDate?: string
   payoutTaxRate: number // percent, default 30
   vatRate: number // percent, default 18
   profitSharePct: number // percent, default 15

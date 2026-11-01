@@ -13,16 +13,30 @@ import { SuppliesPage } from './components/Supplies'
 import { SettingsPage } from './components/Settings'
 import { OpexPage } from './components/Opex'
 import { InvoiceDoc, InvoiceForm, InvoicesPage, blankInvoice, invoiceFromOrder } from './components/Invoice'
-import type { Invoice } from './types'
+import type { AppData, Invoice } from './types'
 
 type Page = 'dashboard' | 'orders' | 'analytics' | 'income' | 'opex' | 'supplies' | 'invoices' | 'settings'
+
+/** Pulls the official USD/GEL rate from the NBG via the serverless function; silently keeps the stored rate on failure. */
+export async function fetchUsdRate(update: (fn: (d: AppData) => AppData) => void): Promise<boolean> {
+  try {
+    const r = await fetch('/api/usd-rate')
+    if (!r.ok) return false
+    const j = (await r.json()) as { rate?: number; date?: string }
+    if (!j.rate || j.rate <= 0) return false
+    update((d) => ({ ...d, settings: { ...d.settings, usdRate: j.rate!, usdRateDate: j.date } }))
+    return true
+  } catch {
+    return false
+  }
+}
 
 export default function App() {
   const { data, update, setData } = useAppData()
   const t = useMemo(() => makeT(data.settings.lang), [data.settings.lang])
   const lang = data.settings.lang
   const [page, setPage] = useState<Page>('dashboard')
-  const [monthSel, setMonth] = useState<string>('all')
+  const [monthSel, setMonth] = useState<string>(() => new Date().toISOString().slice(0, 7))
   const [form, setForm] = useState<{ open: boolean; order?: Order }>({ open: false })
   const [more, setMore] = useState(false)
   const [invoice, setInvoice] = useState<Invoice | null>(null)
@@ -34,8 +48,13 @@ export default function App() {
     document.documentElement.lang = lang
   }, [data.settings.theme, lang])
 
+  useEffect(() => {
+    fetchUsdRate(update)
+  }, [update])
+
   const months = useMemo(() => [...new Set(data.orders.map((o) => monthKey(o.date)))].sort().reverse(), [data.orders])
-  const month = monthSel !== 'all' && !months.includes(monthSel) ? 'all' : monthSel
+  // Default: the current month; if it has no orders yet, the latest month that does.
+  const month = monthSel !== 'all' && !months.includes(monthSel) ? (months[0] ?? 'all') : monthSel
 
   const clients = useMemo(() => [...new Set(data.orders.map((o) => o.client))].sort(), [data.orders])
 
@@ -71,10 +90,9 @@ export default function App() {
   return (
     <div className="app">
       <aside className="sidebar">
-        <div className="brand">
-          NEXT MOVE
-          <small>{lang === 'ka' ? 'ფინანსური დაფა' : 'Finance dashboard'}</small>
-        </div>
+        <button className="brand-logo" onClick={() => go('dashboard')} aria-label="NEXT MOVE">
+          <img src="/invoice/logo.png" alt="NEXT MOVE" />
+        </button>
         {nav.map((n) => (
           <button key={n.id} className={`nav-btn ${page === n.id ? 'active' : ''}`} onClick={() => setPage(n.id)}>
             {n.icon} {n.label}
@@ -145,10 +163,9 @@ export default function App() {
         <div className="drawer-bg" onClick={() => setMore(false)}>
           <div className="drawer" onClick={(e) => e.stopPropagation()}>
             <div className="drawer-head">
-              <div className="brand" style={{ padding: 0 }}>
-                NEXT MOVE
-                <small>{lang === 'ka' ? 'ფინანსური დაფა' : 'Finance dashboard'}</small>
-              </div>
+              <button className="brand-logo" onClick={() => go('dashboard')} aria-label="NEXT MOVE">
+                <img src="/invoice/logo.png" alt="NEXT MOVE" />
+              </button>
               <button className="icon-btn" onClick={() => setMore(false)} aria-label="close">✕</button>
             </div>
             {nav.map((n) => (

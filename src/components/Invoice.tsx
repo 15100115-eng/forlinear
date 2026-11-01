@@ -10,6 +10,8 @@ const money = (n: number) => `GEL ${n.toFixed(2)}`
 export const invoiceTotal = (inv: Invoice) => inv.items.reduce((a, i) => a + (Number(i.qty) || 0) * (Number(i.price) || 0), 0)
 
 /** Next number in the form YYYY-NNN, counting invoices issued in the same year. */
+export const vatModeOf = (inv: Invoice): 'excluded' | 'included' | 'none' => inv.vatMode ?? (inv.vatIncluded ? 'included' : 'excluded')
+
 export function nextInvoiceNumber(data: AppData, date = todayIso()): string {
   const y = date.slice(0, 4)
   const n = (data.invoices ?? []).filter((i) => i.number.startsWith(y + '-')).length + 1
@@ -32,7 +34,7 @@ export function invoiceFromOrder(data: AppData, o: Order): Invoice {
     items,
     bankId: data.settings.defaultBankId ?? data.banks?.[0]?.id ?? '',
     signed: true,
-    vatIncluded: o.vatIncluded,
+    vatMode: o.vatIncluded ? 'included' : 'excluded',
     orderId: o.id,
     createdAt: new Date().toISOString(),
   }
@@ -49,7 +51,7 @@ export function blankInvoice(data: AppData): Invoice {
     items: [{ id: uid(), name: '', qty: 1, price: 0 }],
     bankId: data.settings.defaultBankId ?? data.banks?.[0]?.id ?? '',
     signed: true,
-    vatIncluded: false,
+    vatMode: 'excluded',
     createdAt: new Date().toISOString(),
   }
 }
@@ -60,7 +62,8 @@ export function InvoiceDoc({ inv, data, t }: { inv: Invoice; data: AppData; t: T
   const bank = (data.banks ?? []).find((b) => b.id === inv.bankId)
   const total = invoiceTotal(inv)
   const vatRate = data.settings.vatRate
-  const vatPart = inv.vatIncluded ? total - total / (1 + vatRate / 100) : 0
+  const vatMode = vatModeOf(inv)
+  const vatPart = vatMode === 'included' ? total - total / (1 + vatRate / 100) : 0
   return (
     <div className="inv-doc">
       <div className="inv-bar" />
@@ -117,9 +120,9 @@ export function InvoiceDoc({ inv, data, t }: { inv: Invoice; data: AppData; t: T
       </table>
       <div className="inv-totals">
         <div className="inv-sub"><span>{t('inv_subtotal')}</span><span>{money(total)}</span></div>
-        {inv.vatIncluded && <div className="inv-sub"><span>{t('inv_vatIncl')} ({vatRate}%):</span><span>{money(vatPart)}</span></div>}
+        {vatMode === 'included' && <div className="inv-sub"><span>{t('inv_vatIncl')} ({vatRate}%):</span><span>{money(vatPart)}</span></div>}
         <div className="inv-total"><span>{t('inv_total')}</span><span>{money(total)}</span></div>
-        <div className="inv-vatnote">{inv.vatIncluded ? t('inv_vat_yes') : t('inv_vat_no')}</div>
+        {vatMode !== 'none' && <div className="inv-vatnote">{vatMode === 'included' ? t('inv_vat_yes') : t('inv_vat_no')}</div>}
       </div>
       {inv.signed && (
         <div className="inv-sign">
@@ -220,11 +223,15 @@ export function InvoiceForm({
           </label>
           <div className="hint">{t('inv_signed_hint')}</div>
         </div>
-        <div className="check-wrap full">
-          <label className="check">
-            <input type="checkbox" checked={!!inv.vatIncluded} onChange={(e) => set({ vatIncluded: e.target.checked })} /> {t('inv_vat_toggle')}
-          </label>
-          <div className="hint">{t('inv_vat_hint')}</div>
+        <div className="field full">
+          {t('inv_vat_label')}
+          <div className="chips" style={{ marginTop: 2 }}>
+            {(['excluded', 'included', 'none'] as const).map((m) => (
+              <button type="button" key={m} className={`chip ${vatModeOf(inv) === m ? 'active' : ''}`} onClick={() => set({ vatMode: m, vatIncluded: m === 'included' })}>
+                {t(m === 'excluded' ? 'inv_vat_opt_excl' : m === 'included' ? 'inv_vat_opt_incl' : 'inv_vat_opt_none')}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="full summary-box">
