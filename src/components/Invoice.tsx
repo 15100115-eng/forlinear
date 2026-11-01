@@ -32,6 +32,7 @@ export function invoiceFromOrder(data: AppData, o: Order): Invoice {
     items,
     bankId: data.settings.defaultBankId ?? data.banks?.[0]?.id ?? '',
     signed: true,
+    vatIncluded: o.vatIncluded,
     orderId: o.id,
     createdAt: new Date().toISOString(),
   }
@@ -48,6 +49,7 @@ export function blankInvoice(data: AppData): Invoice {
     items: [{ id: uid(), name: '', qty: 1, price: 0 }],
     bankId: data.settings.defaultBankId ?? data.banks?.[0]?.id ?? '',
     signed: true,
+    vatIncluded: false,
     createdAt: new Date().toISOString(),
   }
 }
@@ -57,6 +59,8 @@ export function InvoiceDoc({ inv, data, t }: { inv: Invoice; data: AppData; t: T
   const co = data.company!
   const bank = (data.banks ?? []).find((b) => b.id === inv.bankId)
   const total = invoiceTotal(inv)
+  const vatRate = data.settings.vatRate
+  const vatPart = inv.vatIncluded ? total - total / (1 + vatRate / 100) : 0
   return (
     <div className="inv-doc">
       <div className="inv-bar" />
@@ -113,7 +117,9 @@ export function InvoiceDoc({ inv, data, t }: { inv: Invoice; data: AppData; t: T
       </table>
       <div className="inv-totals">
         <div className="inv-sub"><span>{t('inv_subtotal')}</span><span>{money(total)}</span></div>
+        {inv.vatIncluded && <div className="inv-sub"><span>{t('inv_vatIncl')} ({vatRate}%):</span><span>{money(vatPart)}</span></div>}
         <div className="inv-total"><span>{t('inv_total')}</span><span>{money(total)}</span></div>
+        <div className="inv-vatnote">{inv.vatIncluded ? t('inv_vat_yes') : t('inv_vat_no')}</div>
       </div>
       {inv.signed && (
         <div className="inv-sign">
@@ -216,6 +222,12 @@ export function InvoiceForm({
             <input type="checkbox" checked={inv.signed} onChange={(e) => set({ signed: e.target.checked })} /> {t('inv_signed')}
           </label>
           <div className="hint">{t('inv_signed_hint')}</div>
+        </div>
+        <div className="check-wrap full">
+          <label className="check">
+            <input type="checkbox" checked={!!inv.vatIncluded} onChange={(e) => set({ vatIncluded: e.target.checked })} /> {t('inv_vat_toggle')}
+          </label>
+          <div className="hint">{t('inv_vat_hint')}</div>
         </div>
 
         <div className="full summary-box">

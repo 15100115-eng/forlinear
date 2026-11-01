@@ -436,6 +436,7 @@ input[type='date']::-webkit-date-and-time-value { text-align: left; }
 .inv-totals { border-top: 1px solid #333; padding-top: 14px; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; margin-bottom: 60px; }
 .inv-sub { display: flex; gap: 40px; font-size: 11px; }
 .inv-total { display: flex; gap: 20px; font-size: 14px; font-weight: 700; border-top: 1px solid #333; padding-top: 8px; min-width: 200px; justify-content: space-between; }
+.inv-vatnote { font-size: 11px; color: #555; margin-top: 4px; }
 .inv-sign h3 { font-size: 13px; }
 .inv-signature { width: 170px; height: auto; display: block; margin-top: 8px; border-bottom: 1px solid #333; padding-bottom: 2px; }
 .print-only { display: none; }

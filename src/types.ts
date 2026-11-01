@@ -122,6 +122,8 @@ export interface Invoice {
   items: InvoiceItem[]
   bankId: string
   signed: boolean
+  /** Prices on the invoice include VAT. */
+  vatIncluded?: boolean
   orderId?: string
   createdAt: string
 }
