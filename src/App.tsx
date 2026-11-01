@@ -112,7 +112,7 @@ export default function App() {
         {page === 'analytics' && <Analytics data={data} t={t} lang={lang} month={month} />}
         {page === 'income' && <IncomePage data={data} t={t} update={update} />}
         {page === 'opex' && <OpexPage data={data} t={t} lang={lang} update={update} />}
-        {page === 'invoices' && <InvoicesPage data={data} t={t} onOpen={(inv) => setInvoice(inv)} onNew={() => setInvoice(blankInvoice(data))} />}
+        {page === 'invoices' && <InvoicesPage data={data} t={t} onOpen={(inv) => setInvoice(inv)} onNew={() => setInvoice(blankInvoice(data))} onDelete={(inv) => update((d) => ({ ...d, invoices: (d.invoices ?? []).filter((x) => x.id !== inv.id) }))} />}
         {page === 'supplies' && <SuppliesPage data={data} t={t} update={update} />}
         {page === 'settings' && <SettingsPage data={data} t={t} update={update} setData={setData} />}
       </main>

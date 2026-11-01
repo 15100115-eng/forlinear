@@ -413,6 +413,8 @@ input[type='date']::-webkit-date-and-time-value { text-align: left; }
 @media (max-width: 900px) { .bank-row { grid-template-columns: 1fr 1fr; } .bank-row .field:nth-child(2) { grid-column: 1 / -1; } }
 /* ---------- Invoice ---------- */
 .inv-preview-wrap { background: #fff; color: #111; border: 1px solid var(--border); border-radius: 8px; padding: 24px 28px; overflow-x: auto; }
+.inv-bar { display: none; }
+.inv-preview-wrap { border-left: 7px solid #f4841f; }
 .inv-doc { font-family: 'Noto Sans Georgian', 'BPG Arial', system-ui, Arial, sans-serif; font-size: 12px; line-height: 1.6; color: #111; min-width: 560px; }
 .inv-doc h3 { font-size: 16px; font-weight: 700; margin: 0 0 6px; color: #111; }
 .inv-doc p { margin: 0; }
@@ -421,9 +423,9 @@ input[type='date']::-webkit-date-and-time-value { text-align: left; }
 .inv-date { width: 60%; text-align: right; padding-top: 6px; }
 .inv-rule { border-top: 1px solid #333; margin-bottom: 6px; }
 .inv-num { color: #555; }
-.inv-parties { display: flex; justify-content: space-between; gap: 24px; margin-bottom: 80px; }
+.inv-parties { display: flex; justify-content: space-between; gap: 24px; margin-bottom: 96px; }
 .inv-parties .inv-right { text-align: right; }
-.inv-table { width: 100%; border-collapse: collapse; margin-bottom: 70px; }
+.inv-table { width: 100%; border-collapse: collapse; margin-bottom: 96px; }
 .inv-table th { text-align: left; font-weight: 700; padding: 8px 0 20px; border: 0; text-transform: none; letter-spacing: 0; font-size: 12px; color: #111; }
 .inv-table td { padding: 4px 0; border: 0; color: #111; }
 .inv-table .num { text-align: right; white-space: nowrap; }
@@ -431,11 +433,13 @@ input[type='date']::-webkit-date-and-time-value { text-align: left; }
 .inv-sub { display: flex; gap: 40px; font-size: 11px; }
 .inv-total { display: flex; gap: 20px; font-size: 14px; font-weight: 700; border-top: 1px solid #333; padding-top: 8px; min-width: 200px; justify-content: space-between; }
 .inv-sign h3 { font-size: 13px; }
-.inv-signature { width: 160px; height: auto; display: block; margin-top: 6px; }
+.inv-signature { width: 170px; height: auto; display: block; margin-top: 8px; border-bottom: 1px solid #333; padding-bottom: 2px; }
 .print-only { display: none; }
 @media print {
-  @page { size: A4; margin: 18mm 16mm; }
-  body { background: #fff; }
+  @page { size: A4; margin: 0; }
+  html, body { background: #fff; }
+  .print-only .inv-doc { padding: 12mm 16mm 14mm 22mm; min-height: 297mm; box-sizing: border-box; }
+  .inv-bar { display: block; position: fixed; left: 0; top: 0; width: 7mm; height: 297mm; background: #f4841f; }
   .app { display: block !important; }
   .app > .sidebar, .app > .main, .app > .bottom-nav, .app > .fab, .app > .sheet-bg, .modal-bg { display: none !important; }
   .print-only { display: block !important; }

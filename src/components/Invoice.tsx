@@ -59,6 +59,7 @@ export function InvoiceDoc({ inv, data, t }: { inv: Invoice; data: AppData; t: T
   const total = invoiceTotal(inv)
   return (
     <div className="inv-doc">
+      <div className="inv-bar" />
       <div className="inv-head">
         <img src="/invoice/logo.png" alt="Next Move" className="inv-logo" />
         <div className="inv-date">
@@ -112,11 +113,13 @@ export function InvoiceDoc({ inv, data, t }: { inv: Invoice; data: AppData; t: T
         <div className="inv-sub"><span>{t('inv_subtotal')}</span><span>{money(total)}</span></div>
         <div className="inv-total"><span>{t('inv_total')}</span><span>{money(total)}</span></div>
       </div>
-      <div className="inv-sign">
-        <h3>{t('inv_director')}</h3>
-        <p>{co.director}</p>
-        {inv.signed && <img src="/invoice/signature.png" alt="" className="inv-signature" />}
-      </div>
+      {inv.signed && (
+        <div className="inv-sign">
+          <h3>{t('inv_director')}</h3>
+          <p>{co.director}</p>
+          <img src="/invoice/signature.png" alt="" className="inv-signature" />
+        </div>
+      )}
     </div>
   )
 }
@@ -226,7 +229,7 @@ export function InvoiceForm({
   )
 }
 
-export function InvoicesPage({ data, t, onOpen, onNew }: { data: AppData; t: T; onOpen: (inv: Invoice) => void; onNew: () => void }) {
+export function InvoicesPage({ data, t, onOpen, onNew, onDelete }: { data: AppData; t: T; onOpen: (inv: Invoice) => void; onNew: () => void; onDelete: (inv: Invoice) => void }) {
   const list = [...(data.invoices ?? [])].sort((a, b) => b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt))
   return (
     <Card title={t('nav_invoices')} right={<button className="btn sm primary" onClick={onNew}>+ {t('invoice')}</button>}>
@@ -251,7 +254,12 @@ export function InvoicesPage({ data, t, onOpen, onNew }: { data: AppData; t: T; 
                   <td style={{ whiteSpace: 'nowrap' }}>{fmtDate(inv.date)}</td>
                   <td>{inv.clientName}<div className="cell-sub">{inv.items.map((i) => i.name).join(', ')}</div></td>
                   <td className="num">{invoiceTotal(inv).toLocaleString()} ₾</td>
-                  <td className="num">{inv.signed ? '✍︎' : ''}</td>
+                  <td className="num" onClick={(e) => e.stopPropagation()}>
+                    <div className="row-actions">
+                      <button className="icon-btn" title={t('inv_print')} onClick={() => onOpen(inv)}>🖨</button>
+                      <button className="icon-btn danger" title={t('delete')} onClick={() => confirm(t('confirmDelete')) && onDelete(inv)}>🗑</button>
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
