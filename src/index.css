@@ -346,3 +346,31 @@ tr.total td { font-weight: 600; border-top: 2px solid var(--axis); }
   .line.sale > *:nth-child(5) { grid-area: amount; align-self: center; text-align: left; font-weight: 600; }
   .line.sale > *:nth-child(6) { grid-area: del; justify-self: end; }
 }
+
+/* Grouped expense form */
+.cost-group { border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px 10px; margin-top: 10px; }
+.cost-group .cg-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 6px; }
+.cost-group .cg-head h4 { font-size: 13px; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.04em; }
+.cost-group .cg-head .sum { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.cost-row { display: grid; grid-template-columns: 1fr 120px 1fr 28px; gap: 8px; align-items: center; padding: 4px 0; }
+.cost-row.mat { grid-template-columns: 1fr 90px 110px 90px 28px; }
+.cost-row .nm { font-size: 14px; }
+.cost-row .x { color: var(--muted); font-size: 13px; white-space: nowrap; }
+.cost-row .tot { text-align: right; font-variant-numeric: tabular-nums; font-size: 14px; }
+.cost-row input[type='number'] { text-align: right; }
+.cost-row .icon-btn { padding: 4px; }
+.cost-group .btn.ghost { margin-top: 4px; padding: 4px 8px; font-size: 13px; color: var(--accent); }
+@media (max-width: 900px) {
+  .cost-row { grid-template-columns: 1fr 1fr 28px; grid-template-areas: 'nm nm del' 'amt cm del2'; row-gap: 6px; }
+  .cost-row > :nth-child(1) { grid-area: nm; }
+  .cost-row > :nth-child(2) { grid-area: amt; }
+  .cost-row > :nth-child(3) { grid-area: cm; }
+  .cost-row > :nth-child(4) { grid-area: del; justify-self: end; }
+  .cost-row.mat { grid-template-columns: 1fr 90px 28px; grid-template-areas: 'nm nm del' 'x qty tot'; }
+  .cost-row.mat > :nth-child(1) { grid-area: nm; }
+  .cost-row.mat > :nth-child(2) { grid-area: qty; }
+  .cost-row.mat > :nth-child(3) { grid-area: x; }
+  .cost-row.mat > :nth-child(4) { grid-area: tot; }
+  .cost-row.mat > :nth-child(5) { grid-area: del; justify-self: end; }
+  .cost-row + .cost-row { border-top: 1px solid var(--grid); padding-top: 8px; }
+}

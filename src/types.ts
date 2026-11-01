@@ -1,8 +1,12 @@
 export type ExpenseKind = 'labor' | 'other' | 'material'
 
+/** UI grouping of an expense line inside the order form. */
+export type ExpenseGroup = 'transport' | 'helper' | 'other' | 'material'
+
 export interface ExpenseLine {
   id: string
   kind: ExpenseKind
+  group?: ExpenseGroup
   name: string
   /** For materials: quantity used (amount = qty * unitPrice when both are set). */
   qty?: number

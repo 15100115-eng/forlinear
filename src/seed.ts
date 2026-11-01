@@ -21,8 +21,13 @@ export const SALE_PRESETS: SalePreset[] = [
   { name: 'წებოვანა ლენტი', price: 0, unitCost: 9.17 },
 ]
 
-export const LABOR_PRESETS = ['ხვიჩა (ტრანსპორტი)', 'ჩვენი დამხმარე', 'ალთუნაშვილი გია', 'ტრანსპორტი', 'ხელოსანი']
-export const OTHER_PRESETS = ['სხვა ხარჯი', 'ტაქსი', 'იანდექს ტაქსი', 'საწყობში ჩამოტვირთვა', 'დაზიანება']
+/** Who usually drives / carries — shown as suggestions in the transport rows. */
+export const TRANSPORT_PRESETS = ['ხვიჩა (ტრანსპორტი)', 'ალთუნაშვილი გია', 'მარკელია პაატა', 'ტრანსპორტი', 'ხელოსანი', 'იანდექს ტაქსი']
+export const HELPER_PRESETS = ['ჩვენი დამხმარე']
+/** Other costs pre-listed in the form; fill the amount only when they occurred. */
+export const OTHER_PRESETS = ['ტაქსი', 'საწყობში ჩამოტვირთვა', 'დაზიანება']
+/** Kept for backwards compatibility. */
+export const LABOR_PRESETS = [...TRANSPORT_PRESETS.slice(0, 4), ...HELPER_PRESETS]
 
 let n = 0
 const id = (p: string) => `${p}${(++n).toString(36)}`
