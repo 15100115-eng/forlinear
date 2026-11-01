@@ -307,6 +307,14 @@ tr.total td { font-weight: 600; border-top: 2px solid var(--axis); }
   .bottom-nav .tab span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
   .bottom-nav .tab svg { width: 22px; height: 22px; }
   .bottom-nav .tab.active { color: var(--accent); font-weight: 600; }
+  .bottom-nav .tab.raise { color: var(--accent); font-weight: 600; }
+  .bottom-nav .tab.raise.orange { color: #f4841f; }
+  .bottom-nav .tab.raise .rb {
+    width: 54px; height: 54px; border-radius: 50%; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center;
+    margin-top: -30px; margin-bottom: 2px; border: 3px solid var(--surface); box-shadow: 0 6px 16px rgba(42, 120, 214, 0.4);
+  }
+  .bottom-nav .tab.raise.orange .rb { background: #f4841f; box-shadow: 0 6px 16px rgba(244, 132, 31, 0.4); }
+  .bottom-nav .tab.raise .rb svg { width: 26px; height: 26px; }
   .burger { display: inline-flex; padding: 6px; color: var(--text); }
   .drawer-bg { display: block; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.4); z-index: 60; }
   .drawer {

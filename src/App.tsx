@@ -129,13 +129,13 @@ export default function App() {
           {Icons.dashboard}
           <span>{t('nav_dashboard')}</span>
         </button>
-        <button className="tab" onClick={() => setForm({ open: true })}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="9" /><path d="M12 8v8M8 12h8" /></svg>
-          <span>{t('tab_addOrder')}</span>
+        <button className="tab raise" onClick={() => setForm({ open: true })}>
+          <span className="rb">{Icons.truck}</span>
+          <span>+ {t('tab_addOrder')}</span>
         </button>
-        <button className="tab" onClick={() => setInvoice(blankInvoice(data))}>
-          {Icons.invoice}
-          <span>{t('tab_invoice')}</span>
+        <button className="tab raise orange" onClick={() => setInvoice(blankInvoice(data))}>
+          <span className="rb">{Icons.invoice}</span>
+          <span>+ {t('tab_invoice')}</span>
         </button>
         <button className={`tab ${page === 'settings' ? 'active' : ''}`} onClick={() => go('settings')}>
           {Icons.settings}
