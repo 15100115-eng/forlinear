@@ -81,19 +81,19 @@ export default function App() {
           </button>
         ))}
         <div className="spacer" />
-        <button className="btn" onClick={() => setInvoice(blankInvoice(data))} style={{ marginBottom: 8 }}>
-          {Icons.invoice} {t('newInvoice')}
+        <button className="btn primary big" onClick={() => setForm({ open: true })} style={{ marginBottom: 8 }}>
+          {Icons.truck} {t('addOrder')}
         </button>
-        <button className="btn primary" onClick={() => setForm({ open: true })}>
-          {t('addOrder')}
+        <button className="btn orange big" onClick={() => setInvoice(blankInvoice(data))}>
+          {Icons.invoice} {t('newInvoice')}
         </button>
       </aside>
       <main className="main">
         <div className="topbar">
-          <h1>{nav.find((n) => n.id === page)?.label}</h1>
-          <div className="right">
+          <div className="topbar-left">
+            <h1>{nav.find((n) => n.id === page)?.label}</h1>
             {showMonth && (
-              <select className="inline-select" value={month} onChange={(e) => setMonth(e.target.value)} aria-label={t('month')}>
+              <select className="inline-select month-select" value={month} onChange={(e) => setMonth(e.target.value)} aria-label={t('month')}>
                 <option value="all">{t('allMonths')}</option>
                 {months.map((m) => (
                   <option key={m} value={m}>
@@ -102,11 +102,13 @@ export default function App() {
                 ))}
               </select>
             )}
-            <button className="btn topbar-add" onClick={() => setInvoice(blankInvoice(data))}>
-              {Icons.invoice} {t('invoice')}
-            </button>
+          </div>
+          <div className="right">
             <button className="btn primary topbar-add" onClick={() => setForm({ open: true })}>
-              {t('addOrder')}
+              {Icons.truck} {t('addOrder')}
+            </button>
+            <button className="btn orange topbar-add" onClick={() => setInvoice(blankInvoice(data))}>
+              {Icons.invoice} {t('newInvoice')}
             </button>
           </div>
         </div>

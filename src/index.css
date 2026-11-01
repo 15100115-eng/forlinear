@@ -119,6 +119,11 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .btn:hover { background: var(--surface-2); }
 .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
 .btn.primary:hover { filter: brightness(1.08); }
+.btn.orange { background: #f4841f; color: #fff; border-color: transparent; }
+.btn.orange:hover { filter: brightness(1.06); }
+.btn.big { padding: 11px 14px; font-weight: 600; justify-content: center; }
+.topbar-left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.month-select { font-size: 13px; padding: 6px 28px 6px 10px; color: var(--text-2); background: var(--surface-2); border-color: transparent; border-radius: 999px; }
 .btn.danger { color: var(--critical-text); }
 .btn.sm { padding: 5px 10px; font-size: 13px; }
 .btn.ghost { border-color: transparent; background: transparent; }
@@ -252,7 +257,8 @@ tr.total td { font-weight: 600; border-top: 2px solid var(--axis); }
   .topbar { margin-bottom: 14px; position: sticky; top: 0; z-index: 20; background: var(--page); padding: 8px 0; }
   .topbar h1 { font-size: 18px; }
   .topbar-add { display: none; }
-  .topbar .right select { padding: 8px 10px; }
+  .topbar-left { gap: 8px; }
+  .month-select { font-size: 14px; padding: 8px 28px 8px 12px; }
   .grid { gap: 12px; }
   .grid.kpis { grid-template-columns: 1fr 1fr; }
   .grid.kpis .tile.hero { grid-column: span 2; }
