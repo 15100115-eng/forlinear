@@ -84,7 +84,7 @@ export function Dashboard({
               data={monthlyData}
               xKey="m"
               series={[
-                { key: 'income', label: t('series_income'), color: c.s1 },
+                { key: 'income', label: t('series_income'), color: c.s1, stack: 'income' },
                 { key: 'orderCost', label: t('series_expenses'), color: c.s2, stack: 'cost' },
                 { key: 'ads', label: t('series_ads'), color: c.s4, stack: 'cost' },
               ]}
