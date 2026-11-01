@@ -48,11 +48,12 @@ export function GroupedBars({
   height = 260,
 }: {
   data: Record<string, unknown>[]
-  series: { key: string; label: string; color: string }[]
+  series: { key: string; label: string; color: string; stack?: string }[]
   xKey: string
   height?: number
 }) {
   const c = useColors()
+  const lastInStack = (s: { stack?: string }, i: number) => !s.stack || series.findLastIndex((x) => x.stack === s.stack) === i
   return (
     <div>
       {series.length > 1 && <Legend items={series.map((s) => ({ label: s.label, color: s.color }))} />}
@@ -63,8 +64,8 @@ export function GroupedBars({
             <XAxis dataKey={xKey} tick={{ fill: c.muted, fontSize: 12 }} axisLine={{ stroke: c.axis }} tickLine={false} />
             <YAxis tick={{ fill: c.muted, fontSize: 12 }} axisLine={false} tickLine={false} tickFormatter={fmtCompact} width={48} />
             <Tooltip content={<ChartTooltip />} cursor={{ fill: c.grid, opacity: 0.4 }} />
-            {series.map((s) => (
-              <Bar key={s.key} dataKey={s.key} name={s.label} fill={s.color} maxBarSize={24} radius={[4, 4, 0, 0]} />
+            {series.map((s, i) => (
+              <Bar key={s.key} dataKey={s.key} name={s.label} fill={s.color} maxBarSize={24} stackId={s.stack} radius={lastInStack(s, i) ? [4, 4, 0, 0] : 0} stroke={s.stack ? c.surface : undefined} strokeWidth={s.stack ? 1 : 0} />
             ))}
           </BarChart>
         </ResponsiveContainer>

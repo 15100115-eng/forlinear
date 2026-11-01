@@ -54,7 +54,7 @@ export function Dashboard({
   const deltaNet = cur && prev ? cur.netResult - prev.netResult : null
   const profitShare = profit * (data.settings.profitSharePct / 100)
 
-  const monthlyData = reports.map((r) => ({ m: fmtMonth(r.month, lang), income: r.netRevenue + r.storage, cost: r.expenses + r.ads + r.opexOther }))
+  const monthlyData = reports.map((r) => ({ m: fmtMonth(r.month, lang), income: r.netRevenue + r.storage, orderCost: r.expenses, ads: r.ads + r.opexOther }))
   const byOrder = totals.map(({ o, t }, i) => ({ n: String(i + 1), client: o.client, profit: t.profit, date: o.date }))
 
   const clients = useMemo(() => {
@@ -85,7 +85,8 @@ export function Dashboard({
               xKey="m"
               series={[
                 { key: 'income', label: t('series_income'), color: c.s1 },
-                { key: 'cost', label: t('series_totalCost'), color: c.s2 },
+                { key: 'orderCost', label: t('series_expenses'), color: c.s2, stack: 'cost' },
+                { key: 'ads', label: t('series_ads'), color: c.s4, stack: 'cost' },
               ]}
             />
           ) : (
