@@ -3,7 +3,7 @@ import * as XLSX from 'xlsx'
 import type { AppData, OpexItem } from '../types'
 import { fmtDate, fmtMoney, fmtMonth, monthKey, opexGel, todayIso, uid } from '../calc'
 import type { Lang, TKey } from '../i18n'
-import { Card, Modal, StatTile } from './ui'
+import { Card, Modal, StatTile, Icons } from './ui'
 import { GroupedBars, useColors } from './charts'
 
 type T = (k: TKey) => string
@@ -213,7 +213,7 @@ export function OpexPage({ data, t, lang, update }: { data: AppData; t: T; lang:
                     <td className="num">{x.currency === 'USD' ? '$' : ''}{x.amount.toFixed(2)}{x.currency === 'GEL' ? ' ₾' : ''}</td>
                     <td className="num">{opexGel(x, s).toFixed(2)}</td>
                     <td className="num" onClick={(e) => e.stopPropagation()}>
-                      <button className="icon-btn danger" onClick={() => confirm(t('confirmDelete')) && update((d) => ({ ...d, opex: d.opex.filter((y) => y.id !== x.id) }))}>🗑</button>
+                      <button className="icon-btn danger" onClick={() => confirm(t('confirmDelete')) && update((d) => ({ ...d, opex: d.opex.filter((y) => y.id !== x.id) }))}>{Icons.trash}</button>
                     </td>
                   </tr>
                 ))}

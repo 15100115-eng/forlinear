@@ -3,7 +3,7 @@ import type { ExpenseGroup, ExpenseLine, Order, OrderType, SaleLine, Settings } 
 import { lineAmount, orderTotals, round2, saleCost, saleRevenue, todayIso, uid } from '../calc'
 import { HELPER_PRESETS, MATERIAL_PRESETS, OTHER_PRESETS, SALE_PRESETS, TRANSPORT_PRESETS } from '../seed'
 import type { TKey } from '../i18n'
-import { Modal, Money } from './ui'
+import { Modal, Money, Icons } from './ui'
 
 type T = (k: TKey) => string
 
@@ -151,7 +151,7 @@ export function OrderForm({
           <input type="number" className="amt" placeholder="₾" min={0} step="0.01" inputMode="decimal" value={l.amount || ''} onChange={(e) => setLine(l.id, { amount: Number(e.target.value) })} onFocus={(e) => e.target.select()} />
           <input type="text" className="cm" placeholder={t('col_comment')} value={l.comment ?? ''} onChange={(e) => setLine(l.id, { comment: e.target.value })} />
           <button type="button" className={`icon-btn cm-toggle ${showCm || l.comment ? 'on' : ''}`} onClick={() => toggleComment(l.id)} aria-label={t('col_comment')} title={t('col_comment')}>
-            💬
+            {Icons.comment}
           </button>
           {!preset && (
             <button type="button" className="icon-btn danger" onClick={() => removeLine(l.id)} aria-label={t('delete')}>✕</button>

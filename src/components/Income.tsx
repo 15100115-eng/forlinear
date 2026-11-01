@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { AppData, StorageClient } from '../types'
 import { fmtMoney, todayIso, uid } from '../calc'
 import type { TKey } from '../i18n'
-import { Card, Modal } from './ui'
+import { Card, Modal, Icons } from './ui'
 
 type T = (k: TKey) => string
 
@@ -35,7 +35,7 @@ export function IncomePage({ data, t, update }: { data: AppData; t: T; update: (
                 <td className="num">{s.monthlyFee.toLocaleString()}</td>
                 <td>{s.active ? '✓' : '—'}</td>
                 <td className="num" onClick={(e) => e.stopPropagation()}>
-                  <button className="icon-btn danger" onClick={() => confirm(t('confirmDelete')) && update((d) => ({ ...d, storage: d.storage.filter((x) => x.id !== s.id) }))}>🗑</button>
+                  <button className="icon-btn danger" onClick={() => confirm(t('confirmDelete')) && update((d) => ({ ...d, storage: d.storage.filter((x) => x.id !== s.id) }))}>{Icons.trash}</button>
                 </td>
               </tr>
             ))}

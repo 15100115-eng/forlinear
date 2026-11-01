@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import type { AppData, Invoice, InvoiceItem, Order } from '../types'
 import { fmtDate, orderTotals, orderType, todayIso, uid } from '../calc'
 import type { TKey } from '../i18n'
-import { Card, Modal } from './ui'
+import { Card, Modal, Icons } from './ui'
 
 type T = (k: TKey) => string
 
@@ -169,7 +169,7 @@ export function InvoiceForm({
         <p className="hint" style={{ margin: '10px 0 0' }}>{t('inv_print_hint')}</p>
         <div className="form-actions">
           <button className="btn" onClick={() => setPreview(false)}>{t('edit')}</button>
-          <button className="btn primary" onClick={() => window.print()}>🖨 {t('inv_print')}</button>
+          <button className="btn primary" onClick={() => window.print()}>{t('inv_print')}</button>
         </div>
       </Modal>
     )
@@ -237,7 +237,7 @@ export function InvoiceForm({
       <div className="form-actions">
         <button className="btn" onClick={onClose}>{t('cancel')}</button>
         <button className="btn" disabled={!valid} onClick={() => { onSave(inv); setPreview(true) }}>{t('inv_preview')}</button>
-        <button className="btn primary" disabled={!valid} onClick={print}>🖨 {t('inv_print')}</button>
+        <button className="btn primary" disabled={!valid} onClick={print}>{t('inv_print')}</button>
       </div>
     </Modal>
   )
@@ -270,8 +270,8 @@ export function InvoicesPage({ data, t, onOpen, onNew, onDelete }: { data: AppDa
                   <td className="num">{invoiceTotal(inv).toLocaleString()} ₾</td>
                   <td className="num" onClick={(e) => e.stopPropagation()}>
                     <div className="row-actions">
-                      <button className="icon-btn" title={t('inv_print')} onClick={() => onOpen(inv)}>🖨</button>
-                      <button className="icon-btn danger" title={t('delete')} onClick={() => confirm(t('confirmDelete')) && onDelete(inv)}>🗑</button>
+                      <button className="icon-btn" title={t('inv_print')} onClick={() => onOpen(inv)}>{Icons.print}</button>
+                      <button className="icon-btn danger" title={t('delete')} onClick={() => confirm(t('confirmDelete')) && onDelete(inv)}>{Icons.trash}</button>
                     </div>
                   </td>
                 </tr>

@@ -82,7 +82,7 @@ export default function App() {
         ))}
         <div className="spacer" />
         <button className="btn" onClick={() => setInvoice(blankInvoice(data))} style={{ marginBottom: 8 }}>
-          🧾 {t('newInvoice')}
+          {Icons.invoice} {t('newInvoice')}
         </button>
         <button className="btn primary" onClick={() => setForm({ open: true })}>
           {t('addOrder')}
@@ -106,7 +106,7 @@ export default function App() {
               </select>
             )}
             <button className="btn topbar-add" onClick={() => setInvoice(blankInvoice(data))}>
-              🧾 {t('invoice')}
+              {Icons.invoice} {t('invoice')}
             </button>
             <button className="btn primary topbar-add" onClick={() => setForm({ open: true })}>
               {t('addOrder')}

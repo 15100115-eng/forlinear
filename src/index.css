@@ -180,7 +180,10 @@ tr.total td { font-weight: 600; border-top: 2px solid var(--axis); }
 .badge.sale { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
 .badge.loss { color: var(--critical-text); border-color: color-mix(in srgb, var(--critical) 40%, transparent); }
 .row-actions { display: flex; gap: 4px; justify-content: flex-end; }
-.icon-btn { border: 0; background: transparent; cursor: pointer; padding: 4px 6px; border-radius: 6px; color: var(--muted); }
+.icon-btn { border: 0; background: transparent; cursor: pointer; padding: 4px 6px; border-radius: 6px; color: var(--muted); display: inline-flex; align-items: center; justify-content: center; }
+.icon-btn svg { width: 18px; height: 18px; }
+.btn svg { width: 18px; height: 18px; }
+.cm-toggle.on { color: var(--accent); }
 .icon-btn:hover { background: var(--surface-2); color: var(--text); }
 .icon-btn.danger:hover { color: var(--critical-text); }
 .empty { padding: 32px; text-align: center; color: var(--muted); }

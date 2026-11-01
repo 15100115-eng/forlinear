@@ -2,7 +2,7 @@ import { useRef } from 'react'
 import type { AppData, BankAccount, CompanyInfo, Settings } from '../types'
 import { uid } from '../calc'
 import type { TKey } from '../i18n'
-import { Card } from './ui'
+import { Card, Icons } from './ui'
 import { exportJson, exportXlsx, importJson } from '../export'
 import { resetToSeed } from '../store'
 
@@ -59,7 +59,7 @@ export function SettingsPage({ data, t, update, setData }: { data: AppData; t: (
               <label className="field">{t('bank_name')}<input type="text" value={b.name} onChange={(e) => setBank(b.id, { name: e.target.value })} /></label>
               <label className="field">{t('bank_iban')}<input type="text" value={b.iban} onChange={(e) => setBank(b.id, { iban: e.target.value.toUpperCase().replace(/\s+/g, '') })} /></label>
               <label className="check"><input type="radio" name="defaultBank" checked={s.defaultBankId === b.id} onChange={() => set({ defaultBankId: b.id })} /> {t('bank_default')}</label>
-              {banks.length > 1 && <button className="icon-btn danger" onClick={() => confirm(t('confirmDelete')) && removeBank(b.id)}>🗑</button>}
+              {banks.length > 1 && <button className="icon-btn danger" onClick={() => confirm(t('confirmDelete')) && removeBank(b.id)}>{Icons.trash}</button>}
             </div>
           ))}
         </div>

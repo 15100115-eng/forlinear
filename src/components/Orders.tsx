@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import type { AppData, Order } from '../types'
 import { fmtDate, fmtMonth, fmtPct, monthKey, orderTotals, orderType } from '../calc'
 import type { Lang, TKey } from '../i18n'
-import { Card, Money } from './ui'
+import { Card, Money, Icons } from './ui'
 
 export function OrdersTable({
   orders,
@@ -60,9 +60,9 @@ export function OrdersTable({
             <span>{t('col_expense')} {tt.totalExpense.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
             {!compact && (onDelete || onDuplicate || onInvoice) && (
               <span className="oc-actions" onClick={(e) => e.stopPropagation()}>
-                {onInvoice && <button className="icon-btn" title={t('invoice')} onClick={() => onInvoice(o)}>🧾</button>}
-                {onDuplicate && <button className="icon-btn" title={t('duplicate')} onClick={() => onDuplicate(o)}>⧉</button>}
-                {onDelete && <button className="icon-btn danger" title={t('delete')} onClick={() => confirm(t('confirmDelete')) && onDelete(o)}>🗑</button>}
+                {onInvoice && <button className="icon-btn" title={t('invoice')} onClick={() => onInvoice(o)}>{Icons.invoice}</button>}
+                {onDuplicate && <button className="icon-btn" title={t('duplicate')} onClick={() => onDuplicate(o)}>{Icons.copy}</button>}
+                {onDelete && <button className="icon-btn danger" title={t('delete')} onClick={() => confirm(t('confirmDelete')) && onDelete(o)}>{Icons.trash}</button>}
               </span>
             )}
           </div>
@@ -113,10 +113,10 @@ export function OrdersTable({
               {!compact && <td className="num muted">{fmtPct(tt.margin)}</td>}
               <td className="num" onClick={(e) => e.stopPropagation()}>
                 <div className="row-actions">
-                  {onInvoice && <button className="icon-btn" title={t('invoice')} onClick={() => onInvoice(o)}>🧾</button>}
-                  <button className="icon-btn" title={t('edit')} onClick={() => onEdit(o)}>✎</button>
-                  {onDuplicate && <button className="icon-btn" title={t('duplicate')} onClick={() => onDuplicate(o)}>⧉</button>}
-                  {onDelete && <button className="icon-btn danger" title={t('delete')} onClick={() => confirm(t('confirmDelete')) && onDelete(o)}>🗑</button>}
+                  {onInvoice && <button className="icon-btn" title={t('invoice')} onClick={() => onInvoice(o)}>{Icons.invoice}</button>}
+                  <button className="icon-btn" title={t('edit')} onClick={() => onEdit(o)}>{Icons.edit}</button>
+                  {onDuplicate && <button className="icon-btn" title={t('duplicate')} onClick={() => onDuplicate(o)}>{Icons.copy}</button>}
+                  {onDelete && <button className="icon-btn danger" title={t('delete')} onClick={() => confirm(t('confirmDelete')) && onDelete(o)}>{Icons.trash}</button>}
                 </div>
               </td>
             </tr>
