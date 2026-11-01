@@ -1,5 +1,6 @@
 import { useRef } from 'react'
-import type { AppData, Settings } from '../types'
+import type { AppData, BankAccount, CompanyInfo, Settings } from '../types'
+import { uid } from '../calc'
 import type { TKey } from '../i18n'
 import { Card } from './ui'
 import { exportJson, exportXlsx, importJson } from '../export'
@@ -9,6 +10,16 @@ export function SettingsPage({ data, t, update, setData }: { data: AppData; t: (
   const file = useRef<HTMLInputElement>(null)
   const s = data.settings
   const set = (p: Partial<Settings>) => update((d) => ({ ...d, settings: { ...d.settings, ...p } }))
+  const co = data.company!
+  const setCo = (p: Partial<CompanyInfo>) => update((d) => ({ ...d, company: { ...d.company!, ...p } }))
+  const banks = data.banks ?? []
+  const setBank = (id: string, p: Partial<BankAccount>) => update((d) => ({ ...d, banks: (d.banks ?? []).map((b) => (b.id === id ? { ...b, ...p } : b)) }))
+  const addBank = (name = '') => update((d) => ({ ...d, banks: [...(d.banks ?? []), { id: uid(), name, iban: '' }] }))
+  const removeBank = (id: string) =>
+    update((d) => {
+      const left = (d.banks ?? []).filter((b) => b.id !== id)
+      return { ...d, banks: left, settings: { ...d.settings, defaultBankId: d.settings.defaultBankId === id ? left[0]?.id : d.settings.defaultBankId } }
+    })
   return (
     <div className="grid two">
       <Card title={t('settings_title')}>
@@ -30,6 +41,27 @@ export function SettingsPage({ data, t, update, setData }: { data: AppData; t: (
               <option value="dark">{t('theme_dark')}</option>
             </select>
           </label>
+        </div>
+      </Card>
+      <Card title={t('company_title')}>
+        <div className="settings-grid">
+          <label className="field" style={{ gridColumn: '1 / -1' }}>{t('co_name')}<input type="text" value={co.name} onChange={(e) => setCo({ name: e.target.value })} /></label>
+          <label className="field">{t('co_taxId')}<input type="text" value={co.taxId} onChange={(e) => setCo({ taxId: e.target.value })} /></label>
+          <label className="field">{t('co_phone')}<input type="text" value={co.phone} onChange={(e) => setCo({ phone: e.target.value })} /></label>
+          <label className="field">{t('co_address')}<input type="text" value={co.address} onChange={(e) => setCo({ address: e.target.value })} /></label>
+          <label className="field">{t('co_director')}<input type="text" value={co.director} onChange={(e) => setCo({ director: e.target.value })} /></label>
+        </div>
+      </Card>
+      <Card title={t('banks_title')} right={<button className="btn sm" onClick={() => addBank(banks.some((b) => /თიბისი|TBC/i.test(b.name)) ? '' : t('bank_tbc'))}>{t('addBank')}</button>}>
+        <div className="lines">
+          {banks.map((b) => (
+            <div className="bank-row" key={b.id}>
+              <label className="field">{t('bank_name')}<input type="text" value={b.name} onChange={(e) => setBank(b.id, { name: e.target.value })} /></label>
+              <label className="field">{t('bank_iban')}<input type="text" value={b.iban} onChange={(e) => setBank(b.id, { iban: e.target.value.toUpperCase().replace(/\s+/g, '') })} /></label>
+              <label className="check"><input type="radio" name="defaultBank" checked={s.defaultBankId === b.id} onChange={() => set({ defaultBankId: b.id })} /> {t('bank_default')}</label>
+              {banks.length > 1 && <button className="icon-btn danger" onClick={() => confirm(t('confirmDelete')) && removeBank(b.id)}>🗑</button>}
+            </div>
+          ))}
         </div>
       </Card>
       <Card title={t('data_title')}>

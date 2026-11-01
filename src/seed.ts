@@ -1,4 +1,4 @@
-import type { AppData, ExpenseLine, MaterialPreset, OpexItem, Order, SalePreset } from './types'
+import type { AppData, BankAccount, CompanyInfo, ExpenseLine, MaterialPreset, OpexItem, Order, SalePreset } from './types'
 import metaSpend from '../public/data/meta-spend.json'
 
 /** Default materials with the unit prices used in the original spreadsheet. */
@@ -92,11 +92,25 @@ export function metaSpendItems(): OpexItem[] {
     }))
 }
 
+/** Company details printed on invoices (from the existing invoice template). */
+export const DEFAULT_COMPANY: CompanyInfo = {
+  name: 'შპს "ნექსთ მუვ სისტემს" - Next Move',
+  taxId: '400457527',
+  phone: '(+995) 500104639',
+  address: '#68 ირაკლი აბაშიძე, თბილისი',
+  director: 'ბექა ჯორთმენაძე',
+}
+
+export const DEFAULT_BANKS: BankAccount[] = [{ id: 'bog', name: 'საქართველოს ბანკი', iban: 'GE69BG0000000613490230' }]
+
 export function seedData(): AppData {
   n = 0
   return {
     version: 1,
-    settings: { usdRate: 2.7, payoutTaxRate: 30, vatRate: 18, profitSharePct: 15, lang: 'ka', theme: 'system' },
+    company: { ...DEFAULT_COMPANY },
+    banks: DEFAULT_BANKS.map((b) => ({ ...b })),
+    invoices: [],
+    settings: { defaultBankId: 'bog', usdRate: 2.7, payoutTaxRate: 30, vatRate: 18, profitSharePct: 15, lang: 'ka', theme: 'system' },
     orders: [
       // სექტემბერი 2026
       order(

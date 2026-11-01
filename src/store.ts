@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { AppData } from './types'
-import { metaSpendItems, seedData } from './seed'
+import { DEFAULT_BANKS, DEFAULT_COMPANY, metaSpendItems, seedData } from './seed'
 
 const KEY = 'nextmove-finance-v1'
 
@@ -32,6 +32,13 @@ export function mergeMetaSpend(d: AppData, items: ReturnType<typeof metaSpendIte
 
 /** Older data kept box sales in a separate list; they are now 'sale' orders. */
 export function migrateSales(d: AppData): AppData {
+  d = {
+    ...d,
+    company: d.company ?? { ...DEFAULT_COMPANY },
+    banks: d.banks?.length ? d.banks : DEFAULT_BANKS.map((b) => ({ ...b })),
+    invoices: d.invoices ?? [],
+    settings: { ...d.settings, defaultBankId: d.settings.defaultBankId ?? 'bog' },
+  }
   if (!d.sales?.length) return { ...d, sales: [] }
   const orders = [
     ...d.orders,

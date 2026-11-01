@@ -12,8 +12,10 @@ import { IncomePage } from './components/Income'
 import { SuppliesPage } from './components/Supplies'
 import { SettingsPage } from './components/Settings'
 import { OpexPage } from './components/Opex'
+import { InvoiceDoc, InvoiceForm, InvoicesPage, blankInvoice, invoiceFromOrder } from './components/Invoice'
+import type { Invoice } from './types'
 
-type Page = 'dashboard' | 'orders' | 'analytics' | 'income' | 'opex' | 'supplies' | 'settings'
+type Page = 'dashboard' | 'orders' | 'analytics' | 'income' | 'opex' | 'supplies' | 'invoices' | 'settings'
 
 export default function App() {
   const { data, update, setData } = useAppData()
@@ -23,6 +25,7 @@ export default function App() {
   const [monthSel, setMonth] = useState<string>('all')
   const [form, setForm] = useState<{ open: boolean; order?: Order }>({ open: false })
   const [more, setMore] = useState(false)
+  const [invoice, setInvoice] = useState<Invoice | null>(null)
 
   useEffect(() => {
     const th = data.settings.theme
@@ -55,6 +58,7 @@ export default function App() {
     { id: 'income', label: t('nav_income'), icon: Icons.income },
     { id: 'opex', label: t('nav_opex'), icon: Icons.ads },
     { id: 'supplies', label: t('nav_supplies'), icon: Icons.supplies },
+    { id: 'invoices', label: t('nav_invoices'), icon: Icons.invoice },
     { id: 'settings', label: t('nav_settings'), icon: Icons.settings },
   ]
   const showMonth = page === 'dashboard' || page === 'orders' || page === 'analytics'
@@ -104,10 +108,11 @@ export default function App() {
         </div>
 
         {page === 'dashboard' && <Dashboard data={data} t={t} lang={lang} month={month} onEdit={(o) => setForm({ open: true, order: o })} goOrders={() => setPage('orders')} />}
-        {page === 'orders' && <OrdersPage data={data} t={t} lang={lang} month={month} onEdit={(o) => setForm({ open: true, order: o })} onDelete={deleteOrder} onDuplicate={duplicateOrder} />}
+        {page === 'orders' && <OrdersPage data={data} t={t} lang={lang} month={month} onEdit={(o) => setForm({ open: true, order: o })} onDelete={deleteOrder} onDuplicate={duplicateOrder} onInvoice={(o) => setInvoice((data.invoices ?? []).find((i) => i.orderId === o.id) ?? invoiceFromOrder(data, o))} />}
         {page === 'analytics' && <Analytics data={data} t={t} lang={lang} month={month} />}
         {page === 'income' && <IncomePage data={data} t={t} update={update} />}
         {page === 'opex' && <OpexPage data={data} t={t} lang={lang} update={update} />}
+        {page === 'invoices' && <InvoicesPage data={data} t={t} onOpen={(inv) => setInvoice(inv)} onNew={() => setInvoice(blankInvoice(data))} />}
         {page === 'supplies' && <SuppliesPage data={data} t={t} update={update} />}
         {page === 'settings' && <SettingsPage data={data} t={t} update={update} setData={setData} />}
       </main>
@@ -137,6 +142,27 @@ export default function App() {
       )}
       <button className="fab" onClick={() => setForm({ open: true })} aria-label={t('addOrder')}>+</button>
 
+      {invoice && (
+        <InvoiceForm
+          key={invoice.id}
+          initial={invoice}
+          data={data}
+          t={t}
+          onClose={() => setInvoice(null)}
+          onSave={(inv) => {
+            update((d) => {
+              const list = d.invoices ?? []
+              return { ...d, invoices: list.some((x) => x.id === inv.id) ? list.map((x) => (x.id === inv.id ? inv : x)) : [...list, inv] }
+            })
+            setInvoice(inv)
+          }}
+        />
+      )}
+      {invoice && (
+        <div className="print-only">
+          <InvoiceDoc inv={invoice} data={data} t={t} />
+        </div>
+      )}
       {form.open && <OrderForm key={form.order?.id ?? 'new'} initial={form.order} settings={data.settings} t={t} onSave={saveOrder} onClose={closeForm} clients={clients} />}
     </div>
   )

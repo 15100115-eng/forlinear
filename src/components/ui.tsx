@@ -112,6 +112,9 @@ export const Icons = {
   ads: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 11v2a1 1 0 001 1h2l5 4V6L6 10H4a1 1 0 00-1 1z" strokeLinejoin="round" /><path d="M15 9a3 3 0 010 6M17.5 6.5a7 7 0 010 11" strokeLinecap="round" /></svg>
   ),
+  invoice: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 3h9l4 4v14H6z" strokeLinejoin="round" /><path d="M15 3v4h4M9 12h6M9 16h6" strokeLinecap="round" /></svg>
+  ),
   supplies: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 8l9-4 9 4v9l-9 4-9-4V8z" strokeLinejoin="round" /><path d="M3 8l9 4 9-4M12 12v9" /></svg>
   ),

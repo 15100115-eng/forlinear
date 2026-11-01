@@ -12,6 +12,7 @@ export function OrdersTable({
   onEdit,
   onDelete,
   onDuplicate,
+  onInvoice,
   compact = false,
 }: {
   orders: Order[]
@@ -21,6 +22,7 @@ export function OrdersTable({
   onEdit: (o: Order) => void
   onDelete?: (o: Order) => void
   onDuplicate?: (o: Order) => void
+  onInvoice?: (o: Order) => void
   compact?: boolean
 }) {
   if (!orders.length) return <div className="empty">{t('orders_empty')}</div>
@@ -56,8 +58,9 @@ export function OrdersTable({
             <span>{fmtDate(o.date)}</span>
             <span>{t('col_revenue')} {tt.grossRevenue.toLocaleString()}</span>
             <span>{t('col_expense')} {tt.totalExpense.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
-            {!compact && (onDelete || onDuplicate) && (
+            {!compact && (onDelete || onDuplicate || onInvoice) && (
               <span className="oc-actions" onClick={(e) => e.stopPropagation()}>
+                {onInvoice && <button className="icon-btn" title={t('invoice')} onClick={() => onInvoice(o)}>🧾</button>}
                 {onDuplicate && <button className="icon-btn" title={t('duplicate')} onClick={() => onDuplicate(o)}>⧉</button>}
                 {onDelete && <button className="icon-btn danger" title={t('delete')} onClick={() => confirm(t('confirmDelete')) && onDelete(o)}>🗑</button>}
               </span>
@@ -110,6 +113,7 @@ export function OrdersTable({
               {!compact && <td className="num muted">{fmtPct(tt.margin)}</td>}
               <td className="num" onClick={(e) => e.stopPropagation()}>
                 <div className="row-actions">
+                  {onInvoice && <button className="icon-btn" title={t('invoice')} onClick={() => onInvoice(o)}>🧾</button>}
                   <button className="icon-btn" title={t('edit')} onClick={() => onEdit(o)}>✎</button>
                   {onDuplicate && <button className="icon-btn" title={t('duplicate')} onClick={() => onDuplicate(o)}>⧉</button>}
                   {onDelete && <button className="icon-btn danger" title={t('delete')} onClick={() => confirm(t('confirmDelete')) && onDelete(o)}>🗑</button>}
@@ -143,6 +147,7 @@ export function OrdersPage({
   onEdit,
   onDelete,
   onDuplicate,
+  onInvoice,
 }: {
   data: AppData
   t: (k: TKey) => string
@@ -151,6 +156,7 @@ export function OrdersPage({
   onEdit: (o: Order) => void
   onDelete: (o: Order) => void
   onDuplicate: (o: Order) => void
+  onInvoice: (o: Order) => void
 }) {
   const [q, setQ] = useState('')
   const [onlyLoss, setOnlyLoss] = useState(false)
@@ -177,7 +183,7 @@ export function OrdersPage({
           <input type="checkbox" checked={onlyLoss} onChange={(e) => setOnlyLoss(e.target.checked)} /> {t('lossOrdersTitle')}
         </label>
       </div>
-      <OrdersTable orders={orders} data={data} t={t} lang={lang} onEdit={onEdit} onDelete={onDelete} onDuplicate={onDuplicate} />
+      <OrdersTable orders={orders} data={data} t={t} lang={lang} onEdit={onEdit} onDelete={onDelete} onDuplicate={onDuplicate} onInvoice={onInvoice} />
     </Card>
   )
 }

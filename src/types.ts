@@ -91,7 +91,44 @@ export interface OpexItem {
   ref?: string
 }
 
+export interface CompanyInfo {
+  name: string
+  taxId: string
+  phone: string
+  address: string
+  director: string
+}
+
+export interface BankAccount {
+  id: string
+  name: string
+  iban: string
+}
+
+export interface InvoiceItem {
+  id: string
+  name: string
+  qty: number
+  price: number
+}
+
+export interface Invoice {
+  id: string
+  number: string
+  date: string
+  clientName: string
+  clientId: string
+  clientAddress: string
+  items: InvoiceItem[]
+  bankId: string
+  signed: boolean
+  orderId?: string
+  createdAt: string
+}
+
 export interface Settings {
+  /** Bank pre-selected on new invoices. */
+  defaultBankId?: string
   /** GEL per 1 USD, used to convert USD expenses. */
   usdRate: number
   payoutTaxRate: number // percent, default 30
@@ -108,6 +145,9 @@ export interface AppData {
   sales: ProductSale[]
   storage: StorageClient[]
   opex: OpexItem[]
+  company?: CompanyInfo
+  banks?: BankAccount[]
+  invoices?: Invoice[]
   settings: Settings
 }
 
