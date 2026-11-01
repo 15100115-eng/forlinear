@@ -219,8 +219,11 @@ tr.total td { font-weight: 600; border-top: 2px solid var(--axis); }
 .line.material { grid-template-columns: 1fr 90px 100px 110px 32px; }
 .line .amount { text-align: right; font-variant-numeric: tabular-nums; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; align-items: center; font-size: 13px; color: var(--muted); }
-.chip { border: 1px solid var(--border); background: var(--surface-2); border-radius: 999px; padding: 3px 10px; font-size: 13px; cursor: pointer; color: var(--text); }
+.chip { border: 1px solid var(--border); background: var(--surface-2); border-radius: 12px; padding: 6px 12px; font-size: 13px; cursor: pointer; color: var(--text); text-align: left; }
 .chip:hover { border-color: var(--accent); }
+.chip.active { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--surface)); color: var(--text); font-weight: 600; }
+.chip small { display: block; font-size: 11px; color: var(--muted); font-weight: 400; font-variant-numeric: tabular-nums; }
+.form-grid > .check-wrap, .form-grid > label.check { grid-column: 1 / -1; }
 .summary-box { background: var(--surface-2); border-radius: 10px; padding: 12px 14px; }
 .summary-box .r { display: flex; justify-content: space-between; padding: 3px 0; font-size: 14px; }
 .summary-box .r.total { font-weight: 600; border-top: 1px solid var(--axis); margin-top: 6px; padding-top: 8px; font-size: 16px; }

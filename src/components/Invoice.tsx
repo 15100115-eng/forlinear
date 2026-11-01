@@ -152,7 +152,6 @@ export function InvoiceForm({
   const setItem = (id: string, p: Partial<InvoiceItem>) => setInv((x) => ({ ...x, items: x.items.map((i) => (i.id === id ? { ...i, ...p } : i)) }))
   const valid = inv.clientName.trim() && inv.date && inv.items.some((i) => i.name.trim())
   const total = useMemo(() => invoiceTotal(inv), [inv])
-  const clients = useMemo(() => [...new Set((data.invoices ?? []).map((i) => i.clientName).concat(data.orders.map((o) => o.client)))].filter(Boolean).sort(), [data])
 
   const print = () => {
     onSave(inv)
@@ -182,12 +181,7 @@ export function InvoiceForm({
         <label className="field">{t('inv_date')}<input type="date" value={inv.date} onChange={(e) => set({ date: e.target.value })} /></label>
         <label className="field full">
           {t('inv_client')} *
-          <input type="text" list="inv-clients" value={inv.clientName} onChange={(e) => set({ clientName: e.target.value })} autoFocus={!inv.clientName} />
-          <datalist id="inv-clients">
-            {clients.map((c) => (
-              <option key={c} value={c} />
-            ))}
-          </datalist>
+          <input type="text" value={inv.clientName} onChange={(e) => set({ clientName: e.target.value })} autoFocus={!inv.clientName} />
         </label>
         <label className="field">{t('inv_clientId')}<input type="text" inputMode="numeric" value={inv.clientId} onChange={(e) => set({ clientId: e.target.value })} /></label>
         <label className="field">{t('inv_clientAddress')}<input type="text" value={inv.clientAddress} onChange={(e) => set({ clientAddress: e.target.value })} /></label>
@@ -209,15 +203,18 @@ export function InvoiceForm({
           </div>
         </div>
 
-        <label className="field">
+        <div className="field full">
           {t('inv_bank')}
-          <select value={inv.bankId} onChange={(e) => set({ bankId: e.target.value })}>
+          <div className="chips" style={{ marginTop: 2 }}>
             {banks.map((b) => (
-              <option key={b.id} value={b.id}>{b.name} · {b.iban}</option>
+              <button type="button" key={b.id} className={`chip ${inv.bankId === b.id ? 'active' : ''}`} onClick={() => set({ bankId: b.id })}>
+                {b.name}
+                <small>{b.iban}</small>
+              </button>
             ))}
-          </select>
-        </label>
-        <div className="check-wrap" style={{ alignSelf: 'end' }}>
+          </div>
+        </div>
+        <div className="check-wrap full">
           <label className="check">
             <input type="checkbox" checked={inv.signed} onChange={(e) => set({ signed: e.target.checked })} /> {t('inv_signed')}
           </label>
