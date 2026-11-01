@@ -92,9 +92,6 @@ export default function App() {
         <div className="topbar">
           <h1>{nav.find((n) => n.id === page)?.label}</h1>
           <div className="right">
-            <button className="icon-btn burger" onClick={() => setMore(true)} aria-label={t('more')}>
-              <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
-            </button>
             {showMonth && (
               <select className="inline-select" value={month} onChange={(e) => setMonth(e.target.value)} aria-label={t('month')}>
                 <option value="all">{t('allMonths')}</option>
@@ -137,9 +134,9 @@ export default function App() {
           <span className="rb">{Icons.invoice}</span>
           <span>+ {t('tab_invoice')}</span>
         </button>
-        <button className={`tab ${page === 'settings' ? 'active' : ''}`} onClick={() => go('settings')}>
-          {Icons.settings}
-          <span>{t('nav_settings')}</span>
+        <button className={`tab ${more ? 'active' : ''}`} onClick={() => setMore(true)}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+          <span>{t('menu')}</span>
         </button>
       </nav>
       {more && (
