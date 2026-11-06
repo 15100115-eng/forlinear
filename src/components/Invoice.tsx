@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { AppData, Invoice, InvoiceItem, Order } from '../types'
 import { fmtDate, orderTotals, orderType, todayIso, uid } from '../calc'
 import type { TKey } from '../i18n'
@@ -55,6 +55,38 @@ export function blankInvoice(data: AppData): Invoice {
     createdAt: new Date().toISOString(),
   }
 }
+
+/** Renders an A4-width document scaled down to fit its container, so the live preview matches the printed page. */
+function LivePreview({ children }: { children: ReactNode }) {
+  const outer = useRef<HTMLDivElement>(null)
+  const inner = useRef<HTMLDivElement>(null)
+  const [scale, setScale] = useState(1)
+  const [h, setH] = useState(0)
+  useLayoutEffect(() => {
+    const o = outer.current
+    const i = inner.current
+    if (!o || !i) return
+    const update = () => {
+      const sc = Math.min(1, o.clientWidth / PAGE_W)
+      setScale(sc)
+      setH(i.offsetHeight * sc)
+    }
+    update()
+    const ro = new ResizeObserver(update)
+    ro.observe(o)
+    ro.observe(i)
+    return () => ro.disconnect()
+  }, [])
+  return (
+    <div className="live-outer" ref={outer} style={{ height: h || undefined }}>
+      <div className="live-page" ref={inner} style={{ width: PAGE_W, transform: `scale(${scale})` }}>
+        {children}
+      </div>
+    </div>
+  )
+}
+
+const PAGE_W = 794
 
 /** The printable document — layout follows the company's existing invoice template. */
 export function InvoiceDoc({ inv, data, t }: { inv: Invoice; data: AppData; t: T }) {
@@ -149,7 +181,7 @@ export function InvoiceForm({
   onClose: () => void
 }) {
   const [inv, setInv] = useState<Invoice>(initial)
-  const [preview, setPreview] = useState(false)
+  const [tab, setTab] = useState<'form' | 'view'>('form')
   const banks = data.banks ?? []
   const set = (p: Partial<Invoice>) => setInv((x) => ({ ...x, ...p }))
   const setItem = (id: string, p: Partial<InvoiceItem>) => setInv((x) => ({ ...x, items: x.items.map((i) => (i.id === id ? { ...i, ...p } : i)) }))
@@ -158,28 +190,17 @@ export function InvoiceForm({
 
   const print = () => {
     onSave(inv)
-    setPreview(true)
     setTimeout(() => window.print(), 300)
   }
 
-  if (preview) {
-    return (
-      <Modal title={`${t('invoice')} ${inv.number}`} onClose={() => setPreview(false)}>
-        <div className="inv-preview-wrap">
-          <InvoiceDoc inv={inv} data={data} t={t} />
-        </div>
-        <p className="hint" style={{ margin: '10px 0 0' }}>{t('inv_print_hint')}</p>
-        <div className="form-actions">
-          <button className="btn" onClick={() => setPreview(false)}>{t('edit')}</button>
-          <button className="btn primary" onClick={() => window.print()}>{t('inv_print')}</button>
-        </div>
-      </Modal>
-    )
-  }
-
   return (
-    <Modal title={initial.createdAt && (data.invoices ?? []).some((i) => i.id === initial.id) ? t('editInvoice') : t('newInvoice')} onClose={onClose}>
-      <div className="form-grid">
+    <Modal className="modal-wide" title={initial.createdAt && (data.invoices ?? []).some((i) => i.id === initial.id) ? t('editInvoice') : t('newInvoice')} onClose={onClose}>
+      <div className="seg-toggle inv-tabs">
+        <button type="button" className={tab === 'form' ? 'active' : ''} onClick={() => setTab('form')}>{t('inv_tab_form')}</button>
+        <button type="button" className={tab === 'view' ? 'active' : ''} onClick={() => setTab('view')}>{t('inv_tab_view')}</button>
+      </div>
+      <div className={`inv-split show-${tab}`}>
+      <div className="form-grid inv-form">
         <label className="field">{t('inv_number')}<input type="text" value={inv.number} onChange={(e) => set({ number: e.target.value })} /></label>
         <label className="field">{t('inv_date')}<input type="date" value={inv.date} onChange={(e) => set({ date: e.target.value })} /></label>
         <label className="field full">
@@ -238,9 +259,16 @@ export function InvoiceForm({
           <div className="r total"><span>{t('inv_total')}</span><span>{money(total)}</span></div>
         </div>
       </div>
+      <div className="inv-live">
+        <LivePreview>
+          <InvoiceDoc inv={inv} data={data} t={t} />
+        </LivePreview>
+        <p className="hint" style={{ margin: '8px 0 0' }}>{t('inv_print_hint')}</p>
+      </div>
+      </div>
       <div className="form-actions">
         <button className="btn" onClick={onClose}>{t('cancel')}</button>
-        <button className="btn" disabled={!valid} onClick={() => { onSave(inv); setPreview(true) }}>{t('inv_preview')}</button>
+        <button className="btn" disabled={!valid} onClick={() => onSave(inv)}>{t('save')}</button>
         <button className="btn primary" disabled={!valid} onClick={print}>{t('inv_print')}</button>
       </div>
     </Modal>

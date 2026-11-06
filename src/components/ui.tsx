@@ -59,7 +59,7 @@ export function Money({ v, digits = 0 }: { v: number; digits?: number }) {
   return <span className={v < 0 ? 'neg' : ''}>{fmtMoney(v, digits)}</span>
 }
 
-export function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
+export function Modal({ title, onClose, children, className = '' }: { title: string; onClose: () => void; children: ReactNode; className?: string }) {
   useEffect(() => {
     const h = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
     window.addEventListener('keydown', h)
@@ -71,7 +71,7 @@ export function Modal({ title, onClose, children }: { title: string; onClose: ()
   }, [onClose])
   return (
     <div className="modal-bg" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="modal" role="dialog" aria-modal="true" aria-label={title}>
+      <div className={`modal ${className}`} role="dialog" aria-modal="true" aria-label={title}>
         <div className="modal-head">
           <h2>{title}</h2>
           <button className="icon-btn" onClick={onClose} aria-label="close">
