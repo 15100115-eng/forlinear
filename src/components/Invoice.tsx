@@ -34,7 +34,7 @@ export function invoiceFromOrder(data: AppData, o: Order): Invoice {
     items,
     bankId: data.settings.defaultBankId ?? data.banks?.[0]?.id ?? '',
     signed: true,
-    vatMode: o.vatIncluded ? 'included' : 'excluded',
+    vatMode: o.vatIncluded ? 'included' : 'none',
     orderId: o.id,
     createdAt: new Date().toISOString(),
   }
@@ -51,7 +51,7 @@ export function blankInvoice(data: AppData): Invoice {
     items: [{ id: uid(), name: '', qty: 1, price: 0 }],
     bankId: data.settings.defaultBankId ?? data.banks?.[0]?.id ?? '',
     signed: true,
-    vatMode: 'excluded',
+    vatMode: 'none',
     createdAt: new Date().toISOString(),
   }
 }
@@ -247,7 +247,7 @@ export function InvoiceForm({
         <div className="field full">
           {t('inv_vat_label')}
           <div className="chips" style={{ marginTop: 2 }}>
-            {(['excluded', 'included', 'none'] as const).map((m) => (
+            {(['none', 'excluded', 'included'] as const).map((m) => (
               <button type="button" key={m} className={`chip ${vatModeOf(inv) === m ? 'active' : ''}`} onClick={() => set({ vatMode: m, vatIncluded: m === 'included' })}>
                 {t(m === 'excluded' ? 'inv_vat_opt_excl' : m === 'included' ? 'inv_vat_opt_incl' : 'inv_vat_opt_none')}
               </button>
