@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { AppData } from './types'
-import { DEFAULT_BANKS, DEFAULT_COMPANY, metaSpendItems, seedData } from './seed'
+import { DEFAULT_BANKS, DEFAULT_COMPANY, metaSpendItems, seedData, spreadsheetUpdates } from './seed'
 
 const KEY = 'nextmove-finance-v1'
 
@@ -11,7 +11,7 @@ export function loadData(): AppData {
       const parsed = JSON.parse(raw) as AppData
       if (parsed && parsed.version === 1 && Array.isArray(parsed.orders)) {
         const seed = seedData()
-        return migrateSales(mergeMetaSpend({ ...seed, ...parsed, settings: { ...seed.settings, ...parsed.settings } }))
+        return mergeSpreadsheetUpdates(migrateSales(mergeMetaSpend({ ...seed, ...parsed, settings: { ...seed.settings, ...parsed.settings } })))
       }
     }
   } catch {
@@ -28,6 +28,20 @@ export function mergeMetaSpend(d: AppData, items: ReturnType<typeof metaSpendIte
   const isOldPaymentSeed = (x: AppData['opex'][number]) => x.category === 'ads' && x.description === 'Meta Ads' && /^\d{10,}-\d{10,}$/.test(x.ref ?? '')
   const kept = (d.opex ?? []).filter((x) => !x.ref?.startsWith('meta-spend-') && !isOldPaymentSeed(x))
   return { ...d, opex: [...kept, ...items] }
+}
+
+/**
+ * Adds orders from newer spreadsheet versions to saved data, once. Skips any the user already
+ * entered by hand (same date and amount) and never re-adds one the user deleted.
+ */
+export function mergeSpreadsheetUpdates(d: AppData): AppData {
+  const done = new Set(d.settings.importedIds ?? [])
+  const updates = spreadsheetUpdates()
+  if (updates.every((o) => done.has(o.id))) return d
+  const toAdd = updates.filter(
+    (o) => !done.has(o.id) && !d.orders.some((x) => x.id === o.id || (x.date === o.date && Number(x.revenue) === o.revenue)),
+  )
+  return { ...d, orders: [...d.orders, ...toAdd], settings: { ...d.settings, importedIds: [...new Set([...done, ...updates.map((o) => o.id)])] } }
 }
 
 /** Older data kept box sales in a separate list; they are now 'sale' orders. */

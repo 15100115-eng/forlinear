@@ -131,6 +131,8 @@ export interface Invoice {
 }
 
 export interface Settings {
+  /** Ids of spreadsheet orders already merged into saved data (so deleted ones are not re-added). */
+  importedIds?: string[]
   /** Bank pre-selected on new invoices. */
   defaultBankId?: string
   /** GEL per 1 USD, used to convert USD expenses. Refreshed from the National Bank of Georgia on load. */

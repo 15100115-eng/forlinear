@@ -63,6 +63,38 @@ const order = (
   createdAt: new Date(date + 'T12:00:00Z').toISOString(),
 })
 
+/** Orders added in later versions of the spreadsheet; fixed ids let saved data pick them up once. */
+export function spreadsheetUpdates(): Order[] {
+  const fixed = (oid: string, o: Order): Order => ({ ...o, id: oid })
+  return [
+    fixed(
+      'xl-2026-10-23',
+      order('2026-10-23', 'გადატანა', 'სახლის გადაბარგება', 850, {}, [
+        labor('ტრანსპორტი', 250),
+        labor('მენეჯერი + დამხმარე', 200),
+        labor('დღიური 2 ბიჭი', 300),
+      ]),
+    ),
+    fixed(
+      'xl-2026-10-25',
+      order('2026-10-25', 'გადატანა', 'სახლის გადაბარგება', 1100, { tax: true }, [
+        labor('ტრანსპორტი', 150),
+        labor('მენეჯერი + დამხმარე', 200),
+        labor('დღიური 2 ბიჭი', 250),
+      ]),
+    ),
+    fixed(
+      'xl-2026-10-27',
+      order('2026-10-27', 'გადატანა', 'საელჩოს სეიფის გადატანა', 1300, { tax: true }, [
+        labor('ტრანსპორტი', 250, 'ვერ მოხერხდა ამით შესრულება'),
+        labor('კრანი', 350),
+        labor('დღიური 2 ბიჭი', 150),
+        labor('მენეჯერი', 100),
+      ]),
+    ),
+  ]
+}
+
 const sale = (date: string, name: string, qty: number, price: number, unitCost: number): Order => ({
   id: id('sale'),
   type: 'sale',
@@ -168,6 +200,7 @@ export function seedData(): AppData {
       sale('2026-09-25', 'მუყაოს ყუთი', 7, 8, 5.5),
       sale('2026-10-05', 'მუყაოს ყუთი', 15, 8, 5.5),
       sale('2026-10-18', 'მუყაოს ყუთი', 5, 8, 5.5),
+      ...spreadsheetUpdates(),
     ],
     supplies: [
       { id: id('s'), supplier: 'შპს უნიბოქს', item: 'მუყაოს ყუთები 40x40x60', unit: 'ცალი', qty: 200, unitPrice: 5.5 },
